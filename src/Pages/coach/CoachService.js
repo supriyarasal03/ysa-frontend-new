@@ -437,3 +437,70 @@ export const getHistoryBatchStudents = async (
     throw err;
   }
 };
+
+
+
+
+// =========================================================
+// GET PERFORMANCE CARD BY BATCH AND PLAYER
+// =========================================================
+
+export const getPerformanceCard = async (
+  batchId,
+  playerId
+) => {
+  try {
+
+    const res = await api.get(
+      `/performance-cards/batch/${batchId}/player/${playerId}`
+    );
+
+    return res.data;
+
+  } catch (error) {
+
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message ||
+      "Failed to fetch performance card"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};
+
+
+// =========================================================
+// GET ALL PERFORMANCE CARDS FOR A BATCH
+// =========================================================
+
+export const getPerformanceCardsByBatch = async (
+  batchId
+) => {
+  try {
+
+    const res = await api.get(
+      `/performance-cards/batch/${batchId}`
+    );
+
+    return res.data;
+
+  } catch (error) {
+
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message ||
+      "Failed to fetch performance cards"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};

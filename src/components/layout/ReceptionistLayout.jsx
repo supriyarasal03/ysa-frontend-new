@@ -11,6 +11,7 @@ import {
   Clock,
   UserPlus,
   Mail,
+  ArrowRightLeft,
 } from "lucide-react";
 import ReceptionistAttendanceService from "../../Pages/receptionist/ReceptionistAttendanceService";
 
@@ -69,8 +70,16 @@ const ReceptionistLayout = () => {
 
 {
   name: "Contact Enquiries",
-  path: "/receptionist/contact-enquiries",
+  path: "/receptionist/ContactEnquiries",
   icon: Mail,
+},
+
+
+
+{
+  name: "Batch Change",
+  path: "/receptionist/batch-change",
+  icon: ArrowRightLeft,
 },
 
   ];

@@ -92,6 +92,9 @@ import LandingPageSports from "./Pages/adminLandingP.Managment/LandingPageSports
 import PlayerEnquiries from "./Pages/receptionist/PlayerEnquiries";
 import LandingPageGallery from "./Pages/adminLandingP.Managment/LandingPageGallery";
 import ContactEnquiries from "./Pages/receptionist/ContactEnquiries";
+import ReceptionistChangeBatch from "./Pages/receptionist/ReceptionistChangeBatch";
+import PerformanceCards
+  from "./Pages/performanceCard/PerformanceCards";
 
 function App() {
   return (
@@ -241,6 +244,9 @@ function App() {
           <Route path="/receptionist/player-enquiries" element={<PlayerEnquiries/>} />
 
 
+          <Route path="/receptionist/batch-change" element={<ReceptionistChangeBatch/>} />
+
+
            <Route path="/receptionist/ContactEnquiries" element={<ContactEnquiries/>}  /> 
 
 
@@ -278,6 +284,11 @@ function App() {
           <Route path="/coach/leave-requests" element={<LeaveRequest />} />
           <Route path="/coach/player-attendance" element={<StudentsAttendance />} />
           <Route path="/coach/Playee-attendance-history" element={<PlayerAttendanceHistory />} />
+
+        <Route
+  path="/coach/performance-card"
+  element={<PerformanceCards />}
+/>
 
 
 

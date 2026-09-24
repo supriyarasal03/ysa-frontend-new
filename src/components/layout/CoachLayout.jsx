@@ -421,6 +421,15 @@ const CoachLayout = () => {
   path:"/coach/history-batches",
   icon:Calendar,
 
+},
+
+
+
+{
+  name:"Performace Cards",
+  path:"/coach/performance-card",
+  icon:Calendar,
+
 }
 
 
