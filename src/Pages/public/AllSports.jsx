@@ -9,16 +9,6 @@ import LandingPageSportService
 
 
 // =========================================================
-// BACKEND URL
-// =========================================================
-
-const BACKEND_URL = "http://localhost:8080";
-
-
-
-
-
-// =========================================================
 // IMAGE URL HELPER
 // =========================================================
 
@@ -36,14 +26,16 @@ const getImageUrl = (imageUrl) => {
     return imageUrl;
   }
 
-  // Relative backend URL
-  return `${BACKEND_URL}${imageUrl}`;
+  // Get file name from:
+  // landing-page/sports/filename.jpg
+  const fileName = imageUrl.split("/").pop();
+
+  // Backend endpoint for serving sports images
+  return `/api/landing-page/sports/image/${fileName}`;
 };
 
 
 const AllSports = () => {
-
-
 
   const navigate = useNavigate();
 
@@ -336,21 +328,22 @@ const AllSports = () => {
 
                       <div className="flex gap-3">
 
+                        <button
+                          onClick={() =>
+                            navigate("/player-enquiry", {
+                              state: {
+                                sportId: sport.sportId,
+                                sportName: sport.name,
+                              },
+                            })
+                          }
+                          className="w-full py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-700 to-blue-500 rounded-full hover:shadow-lg transition-all"
+                        >
 
+                          Enroll Now
 
-                      <button
-  onClick={() =>
-    navigate("/player-enquiry", {
-      state: {
-        sportId: sport.sportId,
-        sportName: sport.name,
-      },
-    })
-  }
-  className="w-full py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-700 to-blue-500 rounded-full hover:shadow-lg transition-all"
->
-  Enroll Now
-</button>
+                        </button>
+
                       </div>
 
                     </div>

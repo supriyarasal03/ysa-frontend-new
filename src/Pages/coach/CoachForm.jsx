@@ -994,10 +994,9 @@ experience:
         if (val === "") {
           return "Salary is required";
         }
-
-        if (!/^\\d+(\\.\\d{1,2})?$/.test(val)) {
-          return "Salary must be a valid amount with up to 2 decimal places";
-        }
+if (!/^\d+(\.\d{1,2})?$/.test(val)) {
+  return "Salary must be a valid amount with up to 2 decimal places";
+}
 
         if (Number(val) <= 0) {
           return "Salary must be greater than 0";

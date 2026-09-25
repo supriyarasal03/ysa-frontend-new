@@ -5,12 +5,6 @@ import LandingPageSportService
   from "../../services/LandingPageSportService";
 
 // =========================================================
-// BACKEND URL
-// =========================================================
-
-const BACKEND_URL = "http://localhost:8080";
-
-// =========================================================
 // IMAGE URL HELPER
 // =========================================================
 
@@ -28,8 +22,12 @@ const getImageUrl = (imageUrl) => {
     return imageUrl;
   }
 
-  // Relative backend path
-  return `${BACKEND_URL}${imageUrl}`;
+  // Get only the file name from:
+  // landing-page/sports/filename.jpg
+  const fileName = imageUrl.split("/").pop();
+
+  // Backend endpoint for serving sports images
+  return `/api/landing-page/sports/image/${fileName}`;
 };
 
 

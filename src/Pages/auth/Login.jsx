@@ -49,7 +49,7 @@ const Login = () => {
 
         else if (role === "RECEPTIONIST") navigate("/receptionist/players");
 
-        else if (role === "INVENTORY_MANAGER") navigate("/innventory-manager");
+        else if (role === "INVENTORY_MANAGER") navigate("/inventory");
         else if (role === "CLEANING_STAFF") navigate("cleaningStaff");
         else if (role === "PLAYER") navigate("/player/attendance");
         else if (role === "PARENT") navigate("/parent");
