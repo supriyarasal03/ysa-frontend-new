@@ -12,6 +12,7 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
+  Mail,
 } from "lucide-react";
 
 import ParentService from "../parent/parentService";
@@ -808,6 +809,16 @@ const ParentDashboard = () => {
                     label="Coach"
                     value={
                       student.coachName
+                    }
+                  />
+
+                  <InfoCard
+                    icon={
+                      <Mail size={18} />
+                    }
+                    label="Coach Email"
+                    value={
+                      student.coachEmail || "Not available"
                     }
                   />
 

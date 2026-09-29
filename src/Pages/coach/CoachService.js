@@ -503,4 +503,107 @@ export const getPerformanceCardsByBatch = async (
 
     throw err;
   }
+
+};
+
+
+
+
+// =========================================================
+// INJURY REPORT APIs
+// COACH DASHBOARD
+// =========================================================
+
+
+// GET ALL INJURY REPORTS ASSIGNED TO LOGGED-IN COACH
+// GET /api/injury-reports/coach
+
+export const getMyInjuryReports = async () => {
+  try {
+    const res = await api.get("/injury-reports/coach");
+    return res.data;
+  } catch (error) {
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message || "Failed to fetch injury reports"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};
+
+
+// GET UNREAD INJURY REPORT COUNT
+// GET /api/injury-reports/coach/unread-count
+
+export const getUnreadInjuryReportCount = async () => {
+  try {
+    const res = await api.get(
+      "/injury-reports/coach/unread-count"
+    );
+
+    return res.data;
+  } catch (error) {
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message || "Failed to fetch unread injury count"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};
+
+
+// GET INJURY REPORT DETAILS BY ID
+// GET /api/injury-reports/{id}
+
+export const getInjuryReportById = async (id) => {
+  try {
+    const res = await api.get(`/injury-reports/${id}`);
+    return res.data;
+  } catch (error) {
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message || "Failed to fetch injury report details"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};
+
+
+// MARK INJURY REPORT AS READ
+// PATCH /api/injury-reports/{id}/read
+
+export const markInjuryReportAsRead = async (id) => {
+  try {
+    const res = await api.patch(
+      `/injury-reports/${id}/read`
+    );
+
+    return res.data;
+  } catch (error) {
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message || "Failed to mark injury report as read"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
 };

@@ -96,6 +96,19 @@ import ReceptionistChangeBatch from "./Pages/receptionist/ReceptionistChangeBatc
 import PerformanceCards
   from "./Pages/performanceCard/PerformanceCards";
 
+// Parent Injury Report
+import ParentInjuryEmail from "./Pages/parent/InjuryEmail-parent";
+
+// Player Injury Report
+import PlayerInjuryEmail from "./Pages/player-dashboard/InjuryEmail";
+
+// Coach Injury Reports
+
+
+import PlayersInjuryEmail from "./Pages/coach/PlayersInjuryEmail";
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -221,6 +234,13 @@ function App() {
            <Route element={<ParentLayout/>}>
            <Route path="/parent"  element={<ParentDashboard/>} />
            <Route path="/parent/students" element={<ParentManagement/>} />
+
+          <Route
+  path="/parent/injury-mail"
+  element={<ParentInjuryEmail />}
+/>
+
+         
            
            
            </Route>
@@ -272,6 +292,10 @@ function App() {
 
 <Route element={<PlayerLayout/>} >
 <Route path="/player/attendance" element={<PlayerSelfAttendance/>}  />
+<Route
+  path="/player/injury-mail"
+  element={<PlayerInjuryEmail />}
+/>
 </Route>
 
           
@@ -279,6 +303,8 @@ function App() {
 
 
         <Route element={<CoachLayout />} >
+
+<Route path="/coach/player-mails" element={<PlayersInjuryEmail/>} />
         
           <Route path="/coach/history-batches" element={<HistoryBatches />} />
           <Route path="/coach/leave-requests" element={<LeaveRequest />} />

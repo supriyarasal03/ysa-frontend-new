@@ -1,3 +1,4 @@
+
 import axiosClient from "../../api/axiosClient";
 
 const ParentService = {
@@ -12,7 +13,6 @@ const ParentService = {
     return response.data;
   },
 
-
   // =========================================================
   // GET STUDENT ATTENDANCE SUMMARY
   // GET /api/parent/students/{playerId}/attendance
@@ -25,7 +25,6 @@ const ParentService = {
 
     return response.data;
   },
-
 
   // =========================================================
   // GET STUDENT ATTENDANCE HISTORY
@@ -40,7 +39,6 @@ const ParentService = {
     return response.data;
   },
 
-
   // =========================================================
   // GET STUDENT PERFORMANCE
   // GET /api/parent/students/{playerId}/performance
@@ -49,6 +47,20 @@ const ParentService = {
   getStudentPerformance: async (playerId) => {
     const response = await axiosClient.get(
       `/parent/students/${playerId}/performance`
+    );
+
+    return response.data;
+  },
+
+  // =========================================================
+  // SUBMIT INJURY REPORT FOR CHILD
+  // POST /api/injury-reports
+  // =========================================================
+
+  sendInjuryReport: async (payload) => {
+    const response = await axiosClient.post(
+      "/injury-reports",
+      payload
     );
 
     return response.data;

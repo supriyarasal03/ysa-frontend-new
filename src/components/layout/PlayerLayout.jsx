@@ -44,6 +44,18 @@ const PlayerLayout = () => {
       path: "/player/attendance",
       icon: UserCheck,
     },
+
+
+
+     {
+      name: "Injury Mail",
+      path: "/player/injury-mail",
+      icon: UserCheck,
+    },
+
+
+
+
   ];
 
 

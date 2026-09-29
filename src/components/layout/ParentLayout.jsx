@@ -44,6 +44,15 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
 
+
+  {
+      name: "Injury Mail",
+
+    path:"/parent/injury-mail",
+    icon: LayoutDashboard,
+
+  },
+
  
 ];
 

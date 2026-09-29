@@ -859,6 +859,14 @@ const ParentManagement = () => {
                           value={student.coachId}
                         />
 
+                        {/* COACH EMAIL */}
+
+                        <InfoItem
+                          icon={<Mail size={17} />}
+                          label="Coach Email"
+                          value={student.coachEmail}
+                        />
+
 
                         {/* BATCH START */}
 

@@ -416,6 +416,15 @@ const CoachLayout = () => {
 
 
 {
+  name: "Player Injury Email",
+path:"/coach/player-mails",
+  icon:Calendar,
+
+},
+
+
+
+{
   name:"History Batches",
 
   path:"/coach/history-batches",

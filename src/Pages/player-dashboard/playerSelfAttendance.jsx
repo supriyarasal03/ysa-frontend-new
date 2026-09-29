@@ -3,6 +3,7 @@ import {
   CalendarDays,
   Clock3,
   UserRound,
+  Mail,
   Trophy,
   LogIn,
   LogOut,
@@ -585,6 +586,15 @@ const PlayerSelfAttendance = () => {
               value={
                 selectedBatch.coachName ||
                 "Not assigned"
+              }
+            />
+
+            <InfoItem
+              icon={<Mail size={19} />}
+              label="Coach Email"
+              value={
+                selectedBatch.coachEmail ||
+                "Email not available"
               }
             />
 

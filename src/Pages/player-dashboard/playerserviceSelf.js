@@ -1,3 +1,4 @@
+
 import axiosClient from "../../api/axiosClient";
 
 const PlayerSelfAttendanceService = {
@@ -14,7 +15,6 @@ const PlayerSelfAttendanceService = {
     return response.data;
   },
 
-
   // ==========================================================
   // GET TODAY'S ATTENDANCE
   // ==========================================================
@@ -26,7 +26,6 @@ const PlayerSelfAttendanceService = {
 
     return response.data;
   },
-
 
   // ==========================================================
   // GET ATTENDANCE HISTORY
@@ -40,7 +39,6 @@ const PlayerSelfAttendanceService = {
     return response.data;
   },
 
-
   // ==========================================================
   // PLAYER PUNCH IN
   // ==========================================================
@@ -53,7 +51,6 @@ const PlayerSelfAttendanceService = {
     return response.data;
   },
 
-
   // ==========================================================
   // PLAYER PUNCH OUT
   // ==========================================================
@@ -64,7 +61,21 @@ const PlayerSelfAttendanceService = {
     );
 
     return response.data;
+  },
+
+  // ==========================================================
+  // SUBMIT PLAYER INJURY REPORT
+  // ==========================================================
+
+  sendInjuryReport: async (reportData) => {
+    const response = await axiosClient.post(
+      "/injury-reports",
+      reportData
+    );
+
+    return response.data;
   }
+
 };
 
 export default PlayerSelfAttendanceService;
