@@ -389,12 +389,7 @@ const InventoryManagerLayout = () => {
 
   const navItems = [
 
-    {
-      name: "Dashboard",
-      path: "/innventory-manager",
-      icon: LayoutDashboard,
-      end: true,
-    },
+ 
 
     {
       name: "Inventory Management",
@@ -408,6 +403,18 @@ const InventoryManagerLayout = () => {
       path: "/innventory/history",
       icon: History,
       end: false,
+    },
+
+
+
+    {
+
+      name:"Innventory Report",
+      path:"/innventoty/innventory-stock",
+     icon: History,
+      end: false,
+
+
     },
 
    

@@ -1,528 +1,528 @@
-    import { useEffect, useState } from "react";
-    import ReceptionistContactService from "./ReceptionistContactService";
+        import { useEffect, useState } from "react";
+        import ReceptionistContactService from "./ReceptionistContactService";
 
-    const ContactEnquiries = () => {
+        const ContactEnquiries = () => {
 
-    const [contacts, setContacts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+        const [contacts, setContacts] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState("");
 
-    const [selectedContact, setSelectedContact] = useState(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
+        const [selectedContact, setSelectedContact] = useState(null);
+        const [loadingDetails, setLoadingDetails] = useState(false);
 
-    // =========================================================
-    // LOAD CONTACT ENQUIRIES
-    // =========================================================
+        // =========================================================
+        // LOAD CONTACT ENQUIRIES
+        // =========================================================
 
-    const loadContacts = async () => {
-        try {
-        setLoading(true);
-        setError("");
+        const loadContacts = async () => {
+            try {
+            setLoading(true);
+            setError("");
 
-        const response =
-            await ReceptionistContactService.getAllContacts();
+            const response =
+                await ReceptionistContactService.getAllContacts();
 
-        if (response?.success) {
-            setContacts(response.data || []);
-        } else {
-            setContacts([]);
-            setError(
-            response?.message ||
-            "Unable to load contact enquiries."
+            if (response?.success) {
+                setContacts(response.data || []);
+            } else {
+                setContacts([]);
+                setError(
+                response?.message ||
+                "Unable to load contact enquiries."
+                );
+            }
+            } catch (err) {
+            console.error(
+                "Error loading contact enquiries:",
+                err
             );
-        }
-        } catch (err) {
-        console.error(
-            "Error loading contact enquiries:",
-            err
-        );
 
-        setContacts([]);
+            setContacts([]);
 
-        setError(
-            err?.response?.data?.message ||
-            "Unable to load contact enquiries."
-        );
-        } finally {
-        setLoading(false);
-        }
-    };
+            setError(
+                err?.response?.data?.message ||
+                "Unable to load contact enquiries."
+            );
+            } finally {
+            setLoading(false);
+            }
+        };
 
-    // =========================================================
-    // INITIAL LOAD
-    // =========================================================
+        // =========================================================
+        // INITIAL LOAD
+        // =========================================================
 
-    useEffect(() => {
-        loadContacts();
-    }, []);
+        useEffect(() => {
+            loadContacts();
+        }, []);
 
-    // =========================================================
-    // VIEW DETAILS
-    // =========================================================
+        // =========================================================
+        // VIEW DETAILS
+        // =========================================================
 
-    const handleViewDetails = async (contact) => {
+        const handleViewDetails = async (contact) => {
 
-        try {
-        setLoadingDetails(true);
-        setError("");
+            try {
+            setLoadingDetails(true);
+            setError("");
 
-        const response =
-            await ReceptionistContactService
-            .getContactById(contact.id);
+            const response =
+                await ReceptionistContactService
+                .getContactById(contact.id);
 
-        if (response?.success) {
-            setSelectedContact(response.data);
-        } else {
+            if (response?.success) {
+                setSelectedContact(response.data);
+            } else {
+                setSelectedContact(contact);
+            }
+
+            } catch (err) {
+
+            console.error(
+                "Error loading contact details:",
+                err
+            );
+
+            // The list record is already available,
+            // so use it as a fallback.
             setSelectedContact(contact);
-        }
 
-        } catch (err) {
+            } finally {
+            setLoadingDetails(false);
+            }
+        };
 
-        console.error(
-            "Error loading contact details:",
-            err
-        );
+        // =========================================================
+        // DATE FORMAT
+        // =========================================================
 
-        // The list record is already available,
-        // so use it as a fallback.
-        setSelectedContact(contact);
+        const formatDateTime = (dateValue) => {
 
-        } finally {
-        setLoadingDetails(false);
-        }
-    };
+            if (!dateValue) {
+            return "-";
+            }
 
-    // =========================================================
-    // DATE FORMAT
-    // =========================================================
+            const date = new Date(dateValue);
 
-    const formatDateTime = (dateValue) => {
+            if (Number.isNaN(date.getTime())) {
+            return dateValue;
+            }
 
-        if (!dateValue) {
-        return "-";
-        }
+            return date.toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            });
+        };
 
-        const date = new Date(dateValue);
+        // =========================================================
+        // RENDER
+        // =========================================================
 
-        if (Number.isNaN(date.getTime())) {
-        return dateValue;
-        }
+        return (
+            <div className="p-6">
+            <div className="max-w-7xl mx-auto">
 
-        return date.toLocaleString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        });
-    };
+                {/* =====================================================
+                    HEADER
+                ===================================================== */}
 
-    // =========================================================
-    // RENDER
-    // =========================================================
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
 
-    return (
-        <div className="p-6">
-        <div className="max-w-7xl mx-auto">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">
+                    Contact Enquiries
+                    </h1>
 
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">
-                Contact Enquiries
-                </h1>
-
-                <p className="text-gray-500 mt-1">
-                View enquiries submitted from the public
-                landing page.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                onClick={loadContacts}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
-            >
-                <i
-                className={`fas ${
-                    loading
-                    ? "fa-spinner fa-spin"
-                    : "fa-rotate"
-                }`}
-                />
-
-                Refresh
-            </button>
-
-            </div>
-
-            {/* =====================================================
-                ERROR
-            ===================================================== */}
-
-            {error && (
-            <div className="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                {error}
-            </div>
-            )}
-
-            {/* =====================================================
-                LOADING
-            ===================================================== */}
-
-            {loading && (
-            <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                <i className="fas fa-spinner fa-spin text-blue-700 text-xl" />
-
-                <p className="text-gray-500 mt-3">
-                Loading contact enquiries...
-                </p>
-            </div>
-            )}
-
-            {/* =====================================================
-                EMPTY
-            ===================================================== */}
-
-            {!loading && contacts.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-
-                <div className="w-16 h-16 mx-auto rounded-full bg-blue-50 flex items-center justify-center">
-                <i className="fas fa-envelope-open-text text-blue-700 text-2xl" />
+                    <p className="text-gray-500 mt-1">
+                    View enquiries submitted from the public
+                    landing page.
+                    </p>
                 </div>
 
-                <h3 className="text-lg font-semibold text-slate-800 mt-4">
-                No Contact Enquiries
-                </h3>
+                <button
+                    type="button"
+                    onClick={loadContacts}
+                    disabled={loading}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
+                >
+                    <i
+                    className={`fas ${
+                        loading
+                        ? "fa-spinner fa-spin"
+                        : "fa-rotate"
+                    }`}
+                    />
 
-                <p className="text-gray-500 mt-1">
-                There are no contact enquiries available.
-                </p>
+                    Refresh
+                </button>
 
-            </div>
-            )}
+                </div>
 
-            {/* =====================================================
-                CONTACT ENQUIRIES TABLE
-            ===================================================== */}
+                {/* =====================================================
+                    ERROR
+                ===================================================== */}
 
-            {!loading && contacts.length > 0 && (
-            <div className="hidden md:block bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                {error && (
+                <div className="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                    {error}
+                </div>
+                )}
 
-                <div className="overflow-x-auto">
+                {/* =====================================================
+                    LOADING
+                ===================================================== */}
 
-                <table className="min-w-full">
+                {loading && (
+                <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+                    <i className="fas fa-spinner fa-spin text-blue-700 text-xl" />
 
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <p className="text-gray-500 mt-3">
+                    Loading contact enquiries...
+                    </p>
+                </div>
+                )}
 
-                    <tr>
-                        <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                        Name
-                        </th>
+                {/* =====================================================
+                    EMPTY
+                ===================================================== */}
 
-                        <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                        Contact
-                        </th>
+                {!loading && contacts.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
 
-                        <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                        Email
-                        </th>
+                    <div className="w-16 h-16 mx-auto rounded-full bg-blue-50 flex items-center justify-center">
+                    <i className="fas fa-envelope-open-text text-blue-700 text-2xl" />
+                    </div>
 
-                        <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                        Query Type
-                        </th>
+                    <h3 className="text-lg font-semibold text-slate-800 mt-4">
+                    No Contact Enquiries
+                    </h3>
 
-                        <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
-                        Submitted
-                        </th>
+                    <p className="text-gray-500 mt-1">
+                    There are no contact enquiries available.
+                    </p>
 
-                        <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase">
-                        Action
-                        </th>
-                    </tr>
+                </div>
+                )}
 
-                    </thead>
+                {/* =====================================================
+                    CONTACT ENQUIRIES TABLE
+                ===================================================== */}
 
-                    <tbody className="divide-y divide-gray-100">
+                {!loading && contacts.length > 0 && (
+                <div className="hidden md:block bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+                    <div className="overflow-x-auto">
+
+                    <table className="min-w-full">
+
+                        <thead className="bg-gray-50 border-b border-gray-200">
+
+                        <tr>
+                            <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Name
+                            </th>
+
+                            <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Contact
+                            </th>
+
+                            <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Email
+                            </th>
+
+                            <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Query Type
+                            </th>
+
+                            <th className="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Submitted
+                            </th>
+
+                            <th className="px-5 py-4 text-right text-xs font-semibold text-gray-500 uppercase">
+                            Action
+                            </th>
+                        </tr>
+
+                        </thead>
+
+                        <tbody className="divide-y divide-gray-100">
+
+                        {contacts.map((contact) => (
+
+                            <tr
+                            key={contact.id}
+                            className="hover:bg-gray-50 transition"
+                            >
+
+                            <td className="px-5 py-4">
+                                <p className="font-semibold text-slate-800">
+                                {contact.firstName}{" "}
+                                {contact.lastName}
+                                </p>
+                            </td>
+
+                            <td className="px-5 py-4 text-sm text-gray-600">
+                                +91 {contact.contactNumber}
+                            </td>
+
+                            <td className="px-5 py-4 text-sm text-gray-600">
+                                {contact.email}
+                            </td>
+
+                            <td className="px-5 py-4">
+                                <span className="inline-flex px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                                {contact.queryType}
+                                </span>
+                            </td>
+
+                            <td className="px-5 py-4 text-sm text-gray-500">
+                                {formatDateTime(
+                                contact.createdAt
+                                )}
+                            </td>
+
+                            <td className="px-5 py-4 text-right">
+
+                                <button
+                                type="button"
+                                onClick={() =>
+                                    handleViewDetails(contact)
+                                }
+                                className="inline-flex items-center gap-2 px-3 py-2 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition"
+                                >
+                                <i className="fas fa-eye" />
+                                View
+                                </button>
+
+                            </td>
+
+                            </tr>
+
+                        ))}
+
+                        </tbody>
+
+                    </table>
+
+                    </div>
+
+                </div>
+                )}
+
+                {/* =====================================================
+                    MOBILE CONTACT CARDS
+                ===================================================== */}
+
+                {!loading && contacts.length > 0 && (
+                <div className="md:hidden space-y-4">
 
                     {contacts.map((contact) => (
 
-                        <tr
+                    <div
                         key={contact.id}
-                        className="hover:bg-gray-50 transition"
-                        >
+                        className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+                    >
 
-                        <td className="px-5 py-4">
-                            <p className="font-semibold text-slate-800">
+                        <div className="flex items-start justify-between gap-3">
+
+                        <div>
+                            <h3 className="font-semibold text-slate-900">
                             {contact.firstName}{" "}
                             {contact.lastName}
-                            </p>
-                        </td>
+                            </h3>
 
-                        <td className="px-5 py-4 text-sm text-gray-600">
-                            +91 {contact.contactNumber}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-gray-600">
+                            <p className="text-sm text-gray-500 mt-1">
                             {contact.email}
-                        </td>
+                            </p>
+                        </div>
 
-                        <td className="px-5 py-4">
-                            <span className="inline-flex px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                        <span className="inline-flex px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
                             {contact.queryType}
-                            </span>
-                        </td>
+                        </span>
 
-                        <td className="px-5 py-4 text-sm text-gray-500">
-                            {formatDateTime(
-                            contact.createdAt
-                            )}
-                        </td>
+                        </div>
 
-                        <td className="px-5 py-4 text-right">
+                        <div className="mt-4 space-y-2 text-sm">
 
-                            <button
-                            type="button"
-                            onClick={() =>
-                                handleViewDetails(contact)
-                            }
-                            className="inline-flex items-center gap-2 px-3 py-2 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition"
-                            >
-                            <i className="fas fa-eye" />
-                            View
-                            </button>
+                        <p className="text-gray-600">
+                            <span className="font-medium text-gray-700">
+                            Phone:
+                            </span>{" "}
+                            +91 {contact.contactNumber}
+                        </p>
 
-                        </td>
+                        <p className="text-gray-500">
+                            {formatDateTime(contact.createdAt)}
+                        </p>
 
-                        </tr>
+                        </div>
+
+                        <button
+                        type="button"
+                        onClick={() =>
+                            handleViewDetails(contact)
+                        }
+                        className="w-full mt-4 px-4 py-2.5 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition"
+                        >
+                        <i className="fas fa-eye mr-2" />
+                        View Enquiry
+                        </button>
+
+                    </div>
 
                     ))}
 
-                    </tbody>
-
-                </table>
-
                 </div>
+                )}
 
             </div>
-            )}
 
-            {/* =====================================================
-                MOBILE CONTACT CARDS
-            ===================================================== */}
+            {/* =======================================================
+                DETAILS MODAL
+            ======================================================= */}
 
-            {!loading && contacts.length > 0 && (
-            <div className="md:hidden space-y-4">
-
-                {contacts.map((contact) => (
-
+            {selectedContact && (
                 <div
-                    key={contact.id}
-                    className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm"
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+                onClick={() => setSelectedContact(null)}
                 >
 
-                    <div className="flex items-start justify-between gap-3">
+                <div
+                    className="w-full max-w-2xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto"
+                    onClick={(event) => event.stopPropagation()}
+                >
+
+                    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
 
                     <div>
-                        <h3 className="font-semibold text-slate-900">
-                        {contact.firstName}{" "}
-                        {contact.lastName}
-                        </h3>
+                        <h2 className="text-xl font-bold text-slate-900">
+                        Contact Enquiry
+                        </h2>
 
                         <p className="text-sm text-gray-500 mt-1">
-                        {contact.email}
+                        Enquiry #{selectedContact.id}
                         </p>
                     </div>
 
-                    <span className="inline-flex px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-                        {contact.queryType}
-                    </span>
-
-                    </div>
-
-                    <div className="mt-4 space-y-2 text-sm">
-
-                    <p className="text-gray-600">
-                        <span className="font-medium text-gray-700">
-                        Phone:
-                        </span>{" "}
-                        +91 {contact.contactNumber}
-                    </p>
-
-                    <p className="text-gray-500">
-                        {formatDateTime(contact.createdAt)}
-                    </p>
-
-                    </div>
-
                     <button
-                    type="button"
-                    onClick={() =>
-                        handleViewDetails(contact)
-                    }
-                    className="w-full mt-4 px-4 py-2.5 border border-blue-200 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition"
+                        type="button"
+                        onClick={() => setSelectedContact(null)}
+                        className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500"
                     >
-                    <i className="fas fa-eye mr-2" />
-                    View Enquiry
+                        <i className="fas fa-times" />
                     </button>
 
+                    </div>
+
+                    <div className="p-6">
+
+                    {loadingDetails && (
+                        <div className="mb-4 text-sm text-blue-700">
+                        <i className="fas fa-spinner fa-spin mr-2" />
+                        Loading latest enquiry details...
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            First Name
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 mt-1">
+                            {selectedContact.firstName || "-"}
+                        </p>
+                        </div>
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            Last Name
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 mt-1">
+                            {selectedContact.lastName || "-"}
+                        </p>
+                        </div>
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            Contact Number
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 mt-1">
+                            +91 {selectedContact.contactNumber || "-"}
+                        </p>
+                        </div>
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            Email ID
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 mt-1 break-all">
+                            {selectedContact.email || "-"}
+                        </p>
+                        </div>
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            Query / Issue Type
+                        </p>
+                        <span className="inline-flex mt-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                            {selectedContact.queryType || "-"}
+                        </span>
+                        </div>
+
+                        <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                            Submitted On
+                        </p>
+                        <p className="text-sm font-medium text-slate-800 mt-1">
+                            {formatDateTime(
+                            selectedContact.createdAt
+                            )}
+                        </p>
+                        </div>
+
+                    </div>
+
+                    <div className="mt-6">
+
+                        <p className="text-xs font-semibold text-gray-400 uppercase">
+                        Message
+                        </p>
+
+                        <div className="mt-2 p-4 bg-gray-50 border border-gray-200 rounded-xl min-h-28">
+
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {selectedContact.message || "No message provided."}
+                        </p>
+
+                        </div>
+
+                    </div>
+
+                    </div>
+
+                    <div className="flex justify-end px-6 py-4 border-t border-gray-200">
+
+                    <button
+                        type="button"
+                        onClick={() => setSelectedContact(null)}
+                        className="px-5 py-2.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
+                    >
+                        Close
+                    </button>
+
+                    </div>
+
                 </div>
 
-                ))}
-
-            </div>
+                </div>
             )}
 
-        </div>
-
-        {/* =======================================================
-            DETAILS MODAL
-        ======================================================= */}
-
-        {selectedContact && (
-            <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-            onClick={() => setSelectedContact(null)}
-            >
-
-            <div
-                className="w-full max-w-2xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-y-auto"
-                onClick={(event) => event.stopPropagation()}
-            >
-
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
-
-                <div>
-                    <h2 className="text-xl font-bold text-slate-900">
-                    Contact Enquiry
-                    </h2>
-
-                    <p className="text-sm text-gray-500 mt-1">
-                    Enquiry #{selectedContact.id}
-                    </p>
-                </div>
-
-                <button
-                    type="button"
-                    onClick={() => setSelectedContact(null)}
-                    className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-500"
-                >
-                    <i className="fas fa-times" />
-                </button>
-
-                </div>
-
-                <div className="p-6">
-
-                {loadingDetails && (
-                    <div className="mb-4 text-sm text-blue-700">
-                    <i className="fas fa-spinner fa-spin mr-2" />
-                    Loading latest enquiry details...
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        First Name
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 mt-1">
-                        {selectedContact.firstName || "-"}
-                    </p>
-                    </div>
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        Last Name
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 mt-1">
-                        {selectedContact.lastName || "-"}
-                    </p>
-                    </div>
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        Contact Number
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 mt-1">
-                        +91 {selectedContact.contactNumber || "-"}
-                    </p>
-                    </div>
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        Email ID
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 mt-1 break-all">
-                        {selectedContact.email || "-"}
-                    </p>
-                    </div>
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        Query / Issue Type
-                    </p>
-                    <span className="inline-flex mt-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-                        {selectedContact.queryType || "-"}
-                    </span>
-                    </div>
-
-                    <div>
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                        Submitted On
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 mt-1">
-                        {formatDateTime(
-                        selectedContact.createdAt
-                        )}
-                    </p>
-                    </div>
-
-                </div>
-
-                <div className="mt-6">
-
-                    <p className="text-xs font-semibold text-gray-400 uppercase">
-                    Message
-                    </p>
-
-                    <div className="mt-2 p-4 bg-gray-50 border border-gray-200 rounded-xl min-h-28">
-
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {selectedContact.message || "No message provided."}
-                    </p>
-
-                    </div>
-
-                </div>
-
-                </div>
-
-                <div className="flex justify-end px-6 py-4 border-t border-gray-200">
-
-                <button
-                    type="button"
-                    onClick={() => setSelectedContact(null)}
-                    className="px-5 py-2.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
-                >
-                    Close
-                </button>
-
-                </div>
-
             </div>
+        );
+        };
 
-            </div>
-        )}
-
-        </div>
-    );
-    };
-
-    export default ContactEnquiries;
+        export default ContactEnquiries;

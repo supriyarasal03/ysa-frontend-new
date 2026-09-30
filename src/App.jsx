@@ -46,7 +46,7 @@ import BatchManagment from "./Pages/batch/BatchManagment";
 import BatchForm from "./Pages/batch/BatchForm";
 
 // Other dashboards
-import InnventoryManagerDashboard from "./Pages/dashboard/InnventoryManagerDashboard";
+
 import CleaningStaffDashboard from "./Pages/dashboard/CleaningStaffDashboard";
 import ReceptionistDashboard from "./Pages/dashboard/ReceptionistDashboard";
 
@@ -106,6 +106,7 @@ import PlayerInjuryEmail from "./Pages/player-dashboard/InjuryEmail";
 
 
 import PlayersInjuryEmail from "./Pages/coach/PlayersInjuryEmail";
+import InventoryManagerReport from "./Pages/innventoty-manager/InnventoryManagerReport";
 
 
 
@@ -194,15 +195,13 @@ function App() {
         <Route element={<InventoryManagerLayout />}>
 
 
-        <Route path="innventory/player-inventoty-purcahse" element={<PlayerInventoryPurchase/>} />
+
+
+        <Route path="/innventory/player-inventoty-purcahse" element={<PlayerInventoryPurchase/>} />
 
 
          <Route path="/inventoty/leave" element={<LeaveRequest />} />
 
-          <Route
-            path="/innventory-manager"
-            element={<InnventoryManagerDashboard />}
-          />
 
 
 
@@ -215,6 +214,8 @@ function App() {
             path="/inventory/add"
             element={<AddInventory />}
           />
+
+          <Route path="/innventoty/innventory-stock" element={<InventoryManagerReport/>} />
 
           <Route
             path="/inventory/receive-stock"
