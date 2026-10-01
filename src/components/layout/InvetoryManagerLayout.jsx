@@ -85,7 +85,7 @@ const InventoryManagerLayout = () => {
 
       } catch (error) {
 
-        // Ignore invalid/unreadable token payload.
+  
 
       }
 
