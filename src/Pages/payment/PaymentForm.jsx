@@ -237,16 +237,22 @@ const handleSubmit = async (e) => {
 
   try {
     setLoading(true);
+const payment = {
+  playerId: Number(selectedEnrollment.playerId),
+  playerEnrollmentId: Number(form.playerEnrollmentId),
+  installmentId: form.installmentId
+    ? Number(form.installmentId)
+    : null,
+  amount: Number(form.amount),
+  paymentMethod: form.paymentMethod,
 
-    const payment = {
-      playerId: Number(selectedEnrollment.playerId),
-      playerEnrollmentId: Number(form.playerEnrollmentId),
-      installmentId: form.installmentId
-        ? Number(form.installmentId)
-        : null,
-      amount: Number(form.amount),
-      paymentMethod: form.paymentMethod
-    };
+  // This is a normal installment payment,
+  // not the initial registration payment.
+  registrationPayment: false
+};
+
+
+
 
     const data = new FormData();
 
@@ -277,11 +283,18 @@ const handleSubmit = async (e) => {
 
     // ⭐ THIS IS THE IMPORTANT CHANGE
     // Works for both CASH and UPI
-    if (response?.data?.id) {
-      await PaymentService.markAsReceived(
-        response.data.id
-      );
-    }
+
+  if (
+  response?.data?.id &&
+  statusUpper(response?.data?.status) !== "RECEIVED"
+) {
+  await PaymentService.markAsReceived(
+    response.data.id
+  );
+}
+
+
+
 
     setSuccess(
       "Payment received successfully."

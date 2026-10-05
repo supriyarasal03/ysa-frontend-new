@@ -284,14 +284,19 @@ const InstallmentPayment = () => {
     try {
       setSubmitting(true);
 
-      const payment = {
-        playerId: installment.playerId,
-        playerEnrollmentId:
-          installment.playerEnrollmentId,
-        installmentId: installment.id,
-        amount: installment.amount,
-        paymentMethod: paymentMethod,
-      };
+     const payment = {
+  playerId: installment.playerId,
+  playerEnrollmentId:
+    installment.playerEnrollmentId,
+  installmentId: installment.id,
+  amount: installment.amount,
+  paymentMethod: paymentMethod,
+
+  // IMPORTANT:
+  // This is a normal installment payment,
+  // NOT the initial registration payment.
+  registrationPayment: false,
+};
 
       const formData = new FormData();
 

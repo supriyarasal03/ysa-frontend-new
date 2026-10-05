@@ -332,81 +332,212 @@ const FeeDetails = () => {
   // EXISTING PLAYER FEE CALCULATION
   // =======================================================
 
+
+
+
+
+
   const getFeeInfo = useCallback(
-    (enrollment) => {
+  (enrollment) => {
 
-      const paid =
-        (
-          payments[
-            enrollment.id
-          ] || []
+    // =========================================================
+    // 1. TOTAL SUCCESSFUL PAYMENT
+    // =========================================================
+    const paid =
+      (
+        payments[
+          enrollment.id
+        ] || []
+      )
+        .filter(
+          isSuccessfulPayment
         )
-          .filter(
-            isSuccessfulPayment
-          )
-          .reduce(
-            (sum, p) =>
-              sum +
-              Number(
-                p.amount || 0
-              ),
-            0
-          );
-
-
-      const total =
-        Number(
-          enrollment.finalAmount || 0
-        );
-
-
-      const remaining =
-        Math.max(
-          total - paid,
+        .reduce(
+          (sum, p) =>
+            sum +
+            Number(
+              p.amount || 0
+            ),
           0
         );
 
 
-      const list =
-        installments[
-          enrollment.id
-        ] || [];
+    // =========================================================
+    // 2. TOTAL ENROLLMENT AMOUNT
+    //    Course Fee + Inventory
+    // =========================================================
+  const total =
+  Number(
+    enrollment.finalAmount ?? 0
+  );
+
+    // =========================================================
+    // 3. INSTALLMENTS
+    //    Installments contain course fee only
+    // =========================================================
+    const list =
+      installments[
+        enrollment.id
+      ] || [];
 
 
-      const pending =
-        list.filter(
-          (i) =>
-            normalizeStatus(
-              i.status
-            ) === "PENDING"
+    // Sort installments by installment number
+    const sortedList =
+      [...list].sort(
+        (a, b) =>
+          Number(
+            a.installmentNumber || 0
+          ) -
+          Number(
+            b.installmentNumber || 0
+          )
+      );
+
+
+    // =========================================================
+    // 4. TOTAL COURSE INSTALLMENT AMOUNT
+    // =========================================================
+    const courseInstallmentTotal =
+      sortedList.reduce(
+        (sum, installment) =>
+          sum +
+          Number(
+            installment.amount || 0
+          ),
+        0
+      );
+
+
+    // =========================================================
+    // 5. INVENTORY AMOUNT
+    //
+    // Example:
+    //
+    // Total Enrollment = 3500
+    // Installments    = 3000
+    //
+    // Inventory       = 500
+    // =========================================================
+    const inventoryAmount =
+      Math.max(
+        total -
+          courseInstallmentTotal,
+        0
+      );
+
+
+    // =========================================================
+    // 6. COURSE AMOUNT PAID
+    //
+    // Registration payment contains:
+    //
+    // Installment 1 + Inventory
+    //
+    // Example:
+    //
+    // Paid = 1500
+    // Inventory = 500
+    //
+    // Course Paid = 1000
+    // =========================================================
+    const paidCourseAmount =
+      Math.min(
+        Math.max(
+          paid -
+            inventoryAmount,
+          0
+        ),
+        courseInstallmentTotal
+      );
+
+
+    // =========================================================
+    // 7. FIND ACTUALLY PAID / PENDING INSTALLMENTS
+    //
+    // Do NOT depend only on backend status.
+    // Calculate from successful payment amount.
+    // =========================================================
+    let remainingCoursePaid =
+      paidCourseAmount;
+
+    const pending = [];
+
+
+    for (
+      const installment of sortedList
+    ) {
+
+      const installmentAmount =
+        Number(
+          installment.amount || 0
         );
 
 
-      return {
+      if (
+        remainingCoursePaid + 0.01 >=
+        installmentAmount
+      ) {
 
-        total,
+        // This installment is already paid
+        remainingCoursePaid -=
+          installmentAmount;
 
-        paid,
+      } else {
 
-        remaining,
+        // This installment is pending
+        pending.push(
+          installment
+        );
 
-        list,
+      }
+    }
 
-        pending,
 
-        status:
-          remaining <= 0
-            ? "COMPLETED"
-            : "PENDING"
+    // =========================================================
+    // 8. TOTAL MONEY REMAINING
+    // =========================================================
+    const remaining =
+      Math.max(
+        total -
+          paid,
+        0
+      );
 
-      };
 
-    },
-    [
-      payments,
-      installments
-    ]
-  );
+    // =========================================================
+    // 9. RETURN
+    // =========================================================
+    return {
+      total,
+      paid,
+      remaining,
+
+      // Return sorted installments
+      list: sortedList,
+
+      // Return our calculated pending installments
+      pending,
+
+      status:
+        remaining <= 0
+          ? "COMPLETED"
+          : "PENDING"
+    };
+
+  },
+  [
+    payments,
+    installments
+  ]
+);
+
+
+
+
+
+
+
+
 
 
   // =======================================================
@@ -2168,7 +2299,7 @@ const FeeModal =
 
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
 
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-white w-full max-w-4xl max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden">
 
 
         {/* HEADER */}
@@ -2205,7 +2336,7 @@ const FeeModal =
 
         {/* BODY */}
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-90px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-90px)]">
 
 
           {/* PLAYER */}
@@ -2259,6 +2390,7 @@ const FeeModal =
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
+
             <Box
               label="Total Fee"
               value={
@@ -2267,6 +2399,9 @@ const FeeModal =
                 )
               }
             />
+
+
+            
 
             <Box
               label="Paid"
@@ -2372,9 +2507,12 @@ const FeeModal =
             info.list.length >
             0 && (
 
+
+              
+
               <div className="border rounded-2xl overflow-hidden">
 
-                <div className="px-5 py-4 bg-gray-50 border-b font-bold text-[#10213f]">
+                <div className="px-5 py-6 bg-gray-50 border-b font-bold text-[#10213f]">
                   Installment Details
                 </div>
 
@@ -2387,7 +2525,7 @@ const FeeModal =
 
                         <div
                           key={i.id}
-                          className="px-5 py-4 flex items-center justify-between"
+                          className="px-10 py-12 flex items-center justify-between"
                         >
 
                           <div>
