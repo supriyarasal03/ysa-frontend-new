@@ -381,6 +381,16 @@ const FeeDetails = () => {
       ] || [];
 
 
+
+      console.log("===== FEE DEBUG =====");
+console.log("Player:", enrollment.playerName);
+console.log("Enrollment:", enrollment);
+console.log("Payments:", payments[enrollment.id] || []);
+console.log("Installments:", list);
+console.log("Final Amount:", enrollment.finalAmount);
+console.log("=====================");
+
+
     // Sort installments by installment number
     const sortedList =
       [...list].sort(

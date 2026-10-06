@@ -454,7 +454,7 @@ const ReceptionistAttendanceManagement = () => {
               TABLE HEADER
           ================================================== */}
 
-          <div className="grid grid-cols-4 bg-slate-50 border-b border-slate-100 px-8 py-5">
+<div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] items-center gap-4 bg-slate-50 border-b border-slate-100 px-8 py-5">
 
             <div className="text-xs font-medium text-slate-500 uppercase">
               Date
@@ -471,6 +471,15 @@ const ReceptionistAttendanceManagement = () => {
             <div className="text-xs font-medium text-slate-500 uppercase">
               Total Hours
             </div>
+
+            <div className="text-xs font-medium text-slate-500 uppercase">
+  Status
+</div>
+
+
+
+
+
 
           </div>
 
@@ -493,6 +502,18 @@ const ReceptionistAttendanceManagement = () => {
           {/* ==================================================
               HISTORY EMPTY
           ================================================== */}
+
+
+
+
+
+
+
+
+
+
+
+
 
           {!historyLoading &&
             attendanceRecords.length === 0 && (
@@ -525,77 +546,111 @@ const ReceptionistAttendanceManagement = () => {
           ================================================== */}
 
           {!historyLoading &&
-            attendanceRecords.map(
-              (record) => (
+  attendanceRecords.map((record) => (
+    <div
+      key={record.id}
+      className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1.2fr] items-center gap-4 px-8 py-6 border-b border-slate-100 last:border-b-0"
+    >
 
-                <div
-                  key={record.id}
-                  className="grid grid-cols-4 items-center px-8 py-6 border-b border-slate-100 last:border-b-0"
-                >
+      {/* DATE */}
+      <div className="flex items-center gap-4">
 
-                  {/* DATE */}
+        <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
 
-                  <div className="flex items-center gap-4">
+          <CalendarDays
+            className="w-5 h-5 text-slate-500"
+          />
 
-                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center">
+        </div>
 
-                      <CalendarDays
-                        className="w-5 h-5 text-slate-500"
-                      />
+        <span className="font-medium text-slate-800">
+          {formatDate(record.attendanceDate)}
+        </span>
 
-                    </div>
-
-                    <span className="font-medium text-slate-800">
-
-                      {formatDate(
-                        record.attendanceDate
-                      )}
-
-                    </span>
-
-                  </div>
+      </div>
 
 
-                  {/* PUNCH IN */}
-
-                  <div className="font-medium text-slate-700">
-
-                    {formatTime(
-                      record.punchInTime
-                    )}
-
-                  </div>
+      {/* PUNCH IN */}
+      <div className="font-medium text-slate-700">
+        {formatTime(record.punchInTime)}
+      </div>
 
 
-                  {/* PUNCH OUT */}
-
-                  <div className="font-medium text-slate-700">
-
-                    {formatTime(
-                      record.punchOutTime
-                    )}
-
-                  </div>
+      {/* PUNCH OUT */}
+      <div className="font-medium text-slate-700">
+        {formatTime(record.punchOutTime)}
+      </div>
 
 
-                  {/* TOTAL HOURS */}
+      {/* TOTAL HOURS */}
+      <div>
 
-                  <div>
+        <span className="inline-flex items-center rounded-xl bg-sky-50 px-4 py-2 font-medium text-sky-600 whitespace-nowrap">
 
-                    <span className="inline-flex items-center rounded-xl bg-sky-50 px-4 py-2 font-medium text-sky-600">
+          {formatHours(record.totalHours)}
 
-                      {formatHours(
-                        record.totalHours
-                      )}
+        </span>
 
-                    </span>
+      </div>
 
-                  </div>
 
-                </div>
+      {/* STATUS */}
+      <div>
 
-              )
-            )}
+        <span
+          className={
+            record.status === "LATE_MARKED"
+              ? "inline-flex items-center rounded-xl bg-orange-50 px-4 py-2 font-medium text-orange-600 whitespace-nowrap"
+
+              : record.status === "PRESENT"
+              ? "inline-flex items-center rounded-xl bg-green-50 px-4 py-2 font-medium text-green-600 whitespace-nowrap"
+
+              : record.status === "COMPLETED_LATE"
+              ? "inline-flex items-center rounded-xl bg-orange-50 px-4 py-2 font-medium text-orange-600 whitespace-nowrap"
+
+              : record.status === "COMPLETED"
+              ? "inline-flex items-center rounded-xl bg-blue-50 px-4 py-2 font-medium text-blue-600 whitespace-nowrap"
+
+              : "inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 font-medium text-slate-500 whitespace-nowrap"
+          }
+        >
+
+          {record.status === "LATE_MARKED"
+            ? "Late Marked"
+
+            : record.status === "PRESENT"
+            ? "Present"
+
+            : record.status === "COMPLETED_LATE"
+            ? "Completed Late"
+
+            : record.status === "COMPLETED"
+            ? "Completed"
+
+            : "Not Marked"}
+
+        </span>
+
+      </div>
+
+    </div>
+  ))}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </div>
 
