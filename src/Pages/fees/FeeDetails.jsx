@@ -334,127 +334,133 @@ const FeeDetails = () => {
 
 
 
-
-
-
-  const getFeeInfo = useCallback(
+const getFeeInfo = useCallback(
   (enrollment) => {
 
     // =========================================================
     // 1. TOTAL SUCCESSFUL PAYMENT
     // =========================================================
+
     const paid =
-      (
-        payments[
-          enrollment.id
-        ] || []
-      )
-        .filter(
-          isSuccessfulPayment
-        )
+      (payments[enrollment.id] || [])
+        .filter(isSuccessfulPayment)
         .reduce(
           (sum, p) =>
-            sum +
-            Number(
-              p.amount || 0
-            ),
+            sum + Number(p.amount || 0),
           0
         );
 
 
     // =========================================================
-    // 2. TOTAL ENROLLMENT AMOUNT
-    //    Course Fee + Inventory
+    // 2. TOTAL PAYABLE
+    //
+    // Course Fee + Inventory Fee
+    //
+    // Example:
+    // Course Fee      = 3000
+    // Inventory Fee   = 1200
+    // Total Payable   = 4200
     // =========================================================
-  const total =
+
+   const batchFee =
+  Number(enrollment.finalAmount ?? 0);
+
+const inventoryFee =
+  Number(enrollment.inventoryFee ?? 0);
+
+const totalPayable =
   Number(
-    enrollment.finalAmount ?? 0
+    enrollment.totalPayable ??
+    (batchFee + inventoryFee)
   );
+
+const total = batchFee;
 
     // =========================================================
     // 3. INSTALLMENTS
-    //    Installments contain course fee only
+    //
+    // Backend now returns:
+    //
+    // Installment 1 = Course installment + Inventory
+    // Installment 2 = Course installment
+    // Installment 3 = Course installment
     // =========================================================
+
     const list =
-      installments[
-        enrollment.id
-      ] || [];
+      installments[enrollment.id] || [];
 
 
+    // =========================================================
+    // 4. SORT INSTALLMENTS
+    // =========================================================
 
-      console.log("===== FEE DEBUG =====");
-console.log("Player:", enrollment.playerName);
-console.log("Enrollment:", enrollment);
-console.log("Payments:", payments[enrollment.id] || []);
-console.log("Installments:", list);
-console.log("Final Amount:", enrollment.finalAmount);
-console.log("=====================");
-
-
-    // Sort installments by installment number
     const sortedList =
       [...list].sort(
         (a, b) =>
-          Number(
-            a.installmentNumber || 0
-          ) -
-          Number(
-            b.installmentNumber || 0
-          )
-      );
-
-
-    // =========================================================
-    // 4. TOTAL COURSE INSTALLMENT AMOUNT
-    // =========================================================
-    const courseInstallmentTotal =
-      sortedList.reduce(
-        (sum, installment) =>
-          sum +
-          Number(
-            installment.amount || 0
-          ),
-        0
+          Number(a.installmentNumber || 0) -
+          Number(b.installmentNumber || 0)
       );
 
 
     // =========================================================
     // 5. INVENTORY AMOUNT
     //
-    // Example:
+    // DO NOT calculate:
     //
-    // Total Enrollment = 3500
-    // Installments    = 3000
+    // total - installment total
     //
-    // Inventory       = 500
+    // because installment 1 already contains inventory.
     // =========================================================
+
     const inventoryAmount =
+      Number(
+        enrollment.inventoryFee ?? 0
+      );
+
+
+    // =========================================================
+    // 6. COURSE INSTALLMENT TOTAL
+    //
+    // Since installment 1 already contains inventory,
+    // subtract inventory to get actual course amount.
+    // =========================================================
+
+    const installmentTotal =
+      sortedList.reduce(
+        (sum, installment) =>
+          sum +
+          Number(installment.amount || 0),
+        0
+      );
+
+
+    const courseInstallmentTotal =
       Math.max(
-        total -
-          courseInstallmentTotal,
+        installmentTotal -
+          inventoryAmount,
         0
       );
 
 
     // =========================================================
-    // 6. COURSE AMOUNT PAID
+    // 7. COURSE AMOUNT PAID
     //
-    // Registration payment contains:
+    // First payment contains:
     //
-    // Installment 1 + Inventory
+    // Inventory + Course Installment 1
     //
     // Example:
     //
-    // Paid = 1500
-    // Inventory = 500
+    // Paid = 2200
+    // Inventory = 1200
     //
     // Course Paid = 1000
     // =========================================================
+
     const paidCourseAmount =
       Math.min(
         Math.max(
-          paid -
-            inventoryAmount,
+          paid - inventoryAmount,
           0
         ),
         courseInstallmentTotal
@@ -462,70 +468,58 @@ console.log("=====================");
 
 
     // =========================================================
-    // 7. FIND ACTUALLY PAID / PENDING INSTALLMENTS
+    // 8. FIND PAID / PENDING INSTALLMENTS
     //
-    // Do NOT depend only on backend status.
     // Calculate from successful payment amount.
     // =========================================================
-    let remainingCoursePaid =
-      paidCourseAmount;
-
-    const pending = [];
 
 
-    for (
-      const installment of sortedList
-    ) {
-
-      const installmentAmount =
-        Number(
-          installment.amount || 0
-        );
 
 
-      if (
-        remainingCoursePaid + 0.01 >=
-        installmentAmount
-      ) {
 
-        // This installment is already paid
-        remainingCoursePaid -=
-          installmentAmount;
 
-      } else {
 
-        // This installment is pending
-        pending.push(
-          installment
-        );
 
-      }
-    }
+const pending =
+  sortedList.filter(
+    (installment) =>
+      normalizeStatus(
+        installment.status
+      ) !== "PAID"
+  );
+
+
+
+
+
+
+
 
 
     // =========================================================
-    // 8. TOTAL MONEY REMAINING
+    // 9. TOTAL MONEY REMAINING
     // =========================================================
-    const remaining =
-      Math.max(
-        total -
-          paid,
-        0
-      );
+
+  const remaining =
+  Math.max(
+    totalPayable - paid,
+    0
+  );
 
 
     // =========================================================
-    // 9. RETURN
+    // 10. RETURN
     // =========================================================
+
     return {
       total,
+
       paid,
+
       remaining,
 
-      // Return sorted installments
       list: sortedList,
 
-      // Return our calculated pending installments
       pending,
 
       status:
@@ -533,17 +527,12 @@ console.log("=====================");
           ? "COMPLETED"
           : "PENDING"
     };
-
   },
   [
     payments,
     installments
   ]
 );
-
-
-
-
 
 
 
@@ -659,8 +648,12 @@ console.log("=====================");
             batchName:
               enrollment.batchName,
 
-            finalAmount:
-              info.total,
+           finalAmount:
+  enrollment.totalPayable ??
+  (
+    Number(enrollment.finalAmount ?? 0) +
+    Number(enrollment.inventoryFee ?? 0)
+  ),
 
             paidAmount:
               info.paid,
@@ -2402,7 +2395,7 @@ const FeeModal =
 
 
             <Box
-              label="Total Fee"
+              label="Batch Fee"
               value={
                 formatCurrency(
                   info.total
@@ -2414,7 +2407,7 @@ const FeeModal =
             
 
             <Box
-              label="Paid"
+              label="Total Paid"
               value={
                 formatCurrency(
                   info.paid
