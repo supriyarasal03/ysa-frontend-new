@@ -147,6 +147,15 @@ const AdminLayout = () => {
       icon: Calendar,
     },
 
+
+
+    {
+        name: "Reposts",
+        path:"/admin/reports",
+       icon: Package,
+    },
+
+
     {
       name: "Add sport",
       path: "/admin/landingPage-Sports",

@@ -114,6 +114,8 @@ import PhysiotherapistManagement
 
 import PhysiotherapistForm
   from "./Pages/Physiotherapist/PhysiotherapistForm";
+import Reports from "./Pages/reports/Reports";
+import BatchReports from "./Pages/reports/BatchReport";
 
 
 
@@ -145,6 +147,12 @@ function App() {
 
         {/* ADMIN */}
         <Route element={<AdminLayout />}>
+
+
+           <Route path="/admin/reports" element={<Reports />} />
+
+           <Route path="/admin/batch-reports" element={<BatchReports/>}  />
+
           <Route path="/admin" element={<AdminDashboar />} />
 
 
