@@ -108,6 +108,15 @@ const AdminLayout = () => {
       icon: Users,
     },
 
+
+    {
+      name:"Physiotherapist managment",
+
+      path: "/admin/physiotherapist-management",
+      icon: Users,
+
+    },
+
     {
       name: "Sports Managment",
       path: "/admin/sport-management",

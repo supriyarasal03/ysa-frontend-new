@@ -109,6 +109,13 @@ import PlayersInjuryEmail from "./Pages/coach/PlayersInjuryEmail";
 import InventoryManagerReport from "./Pages/innventoty-manager/InnventoryManagerReport";
 
 
+import PhysiotherapistManagement
+  from "./Pages/Physiotherapist/PhysiotherapistManagement";
+
+import PhysiotherapistForm
+  from "./Pages/Physiotherapist/PhysiotherapistForm";
+
+
 
 function App() {
   return (
@@ -139,6 +146,18 @@ function App() {
         {/* ADMIN */}
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminDashboar />} />
+
+
+          <Route path="/admin/physiotherapist-management" element={<PhysiotherapistManagement/>} />
+
+          <Route path="/admin/physiotherapist-form" element={<PhysiotherapistForm/>} />
+
+           <Route
+  path="/admin/physiotherapist-form/:id"
+  element={<PhysiotherapistForm />}
+/>
+
+
 
           <Route path="/admin/staff-attendance" element={<StaffAttendance />} />
 
