@@ -30,7 +30,15 @@ const PlayerService = {
     const res = await axiosClient.get("/sport"); 
     return res.data; 
   }, 
- 
+
+// =========================================================
+// GET ACTIVE PHYSIOTHERAPISTS
+// =========================================================
+
+getActivePhysiotherapists: async () => {
+  const res = await axiosClient.get("/physiotherapists/active");
+  return res.data;
+},
  
   // ========================================================= 
   // OLD CREATE PLAYER 
