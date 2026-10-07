@@ -3246,68 +3246,6 @@ export default function PhysiotherapistManagement() {
 
 
 
-                <th
-
-
-
-                  onClick={() =>
-
-
-
-                    toggleSort("employeeId")
-
-
-
-                  }
-
-
-
-                  className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase cursor-pointer"
-
-
-
-                >
-
-
-
-
-
-
-
-                  <div className="flex items-center gap-1.5">
-
-
-
-
-
-
-
-                    Employee ID
-
-
-
-
-
-
-
-                    <SortIcon field="employeeId" />
-
-
-
-
-
-
-
-                  </div>
-
-
-
-
-
-
-
-                </th>
-
 
 
 
@@ -3761,32 +3699,6 @@ export default function PhysiotherapistManagement() {
 
 
 
-
-                        <td className="px-6 py-4">
-
-
-
-
-
-
-
-                          <span className="text-sm text-slate-700">
-
-
-
-                            {person.employeeId || "-"}
-
-
-
-                          </span>
-
-
-
-
-
-
-
-                        </td>
 
 
 
@@ -4286,7 +4198,7 @@ navigate(
 
 
 
-                    colSpan="8"
+                    colSpan="7"
 
 
 
@@ -4647,41 +4559,10 @@ navigate(
 
 
                     </h3>
-
-
-
-
-
-
-
                     <p className="text-sm text-slate-500 mt-1">
-
-
-
-
-
-
-
                       Employee ID:{" "}
-
-
-
-                      {selectedPhysiotherapist.employeeId || "-"}
-
-
-
-
-
-
-
+       {selectedPhysiotherapist.employeeId || "-"}
                     </p>
-
-
-
-
-
-
-
                     <span
 
 

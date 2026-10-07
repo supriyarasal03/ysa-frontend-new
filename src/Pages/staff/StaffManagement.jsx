@@ -50,6 +50,10 @@ export default function StaffManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+
+const [photoUrls, setPhotoUrls] = useState({});
+
+
   const [sortField, setSortField] = useState("id");
   const [sortDir, setSortDir] = useState("desc");
 
@@ -142,22 +146,55 @@ setCurrentPage(1);
       .replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
-  // IMPORTANT: uses photoUrl from backend
-const getPhotoUrl = (staff) => {
-  const path = staff?.photoUrl;
 
-  if (!path) return null;
 
-  if (
-    path.startsWith("http") ||
-    path.startsWith("blob:") ||
-    path.startsWith("data:")
-  ) {
-    return path;
-  }
 
-  return `${API_BASE}${path}`;
-};
+useEffect(() => {
+  let createdUrls = [];
+
+  const loadStaffPhotos = async () => {
+    if (!staffList || staffList.length === 0) {
+      return;
+    }
+
+    const urls = {};
+
+    for (const staff of staffList) {
+      if (!staff?.id || !staff?.photoUrl) {
+        continue;
+      }
+
+      try {
+        const blob = await getStaffDocument(staff.id, "photo");
+
+        const url = URL.createObjectURL(blob);
+
+        urls[staff.id] = url;
+        createdUrls.push(url);
+      } catch (error) {
+        console.error(
+          `Unable to load photo for staff ${staff.id}:`,
+          error
+        );
+      }
+    }
+
+    setPhotoUrls(urls);
+  };
+
+  loadStaffPhotos();
+
+  return () => {
+    createdUrls.forEach((url) => {
+      URL.revokeObjectURL(url);
+    });
+  };
+}, [staffList]);
+
+
+
+
+
 
   // ---------- Counts ----------
   const totalStaff = staffList.length;
@@ -574,7 +611,9 @@ const openDocumentPreview = async (label, documentType) => {
                     .join("")
                     .slice(0, 2)
                     .toUpperCase();
-                  const photoUrl = getPhotoUrl(staff);
+
+
+             const photoUrl = photoUrls[staff.id];
 
                   return (
                     <tr key={staff.id} className="hover:bg-slate-50/70 transition">
@@ -803,15 +842,25 @@ const openDocumentPreview = async (label, documentType) => {
                   <div
   className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shrink-0 cursor-pointer group"
   onClick={() => {
-    if (getPhotoUrl(viewStaff)) {
+
+
+   if (photoUrls[viewStaff.id]) {
+
+
+
       setPhotoPreviewOpen(true);
     }
   }}
-  title={getPhotoUrl(viewStaff) ? "Click to view photo" : ""}
+
+
+title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
+
+
 >
-  {getPhotoUrl(viewStaff) ? (
+ {photoUrls[viewStaff.id] ? (
     <img
-      src={getPhotoUrl(viewStaff)}
+    src={photoUrls[viewStaff.id]}
+
       alt={getFullName(viewStaff)}
       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
     />
@@ -1233,7 +1282,9 @@ const openDocumentPreview = async (label, documentType) => {
 
 {/* ==================== PHOTO PREVIEW MODAL ==================== */}
 
-{photoPreviewOpen && viewStaff && getPhotoUrl(viewStaff) && (
+{photoPreviewOpen &&
+  viewStaff &&
+  photoUrls[viewStaff.id] && (
   <div
     className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4"
     onClick={() => setPhotoPreviewOpen(false)}
@@ -1255,7 +1306,7 @@ const openDocumentPreview = async (label, documentType) => {
 
       {/* Staff Photo */}
       <img
-        src={getPhotoUrl(viewStaff)}
+       src={photoUrls[viewStaff.id]}
         alt={getFullName(viewStaff)}
         className="max-w-[90vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl"
       />

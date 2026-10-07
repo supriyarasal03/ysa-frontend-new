@@ -433,12 +433,8 @@ const inputClass = (name) =>
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Sports Name <span className="text-rose-500">*</span>
               </label>
-
-              <div className="relative">
-               <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-
-
-<input
+<div>
+  <input
   type="text"
   name="sportsName"
   value={formData.sportsName}
