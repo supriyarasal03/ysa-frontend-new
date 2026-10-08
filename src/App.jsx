@@ -116,6 +116,7 @@ import PhysiotherapistForm
   from "./Pages/Physiotherapist/PhysiotherapistForm";
 import Reports from "./Pages/reports/Reports";
 import BatchReports from "./Pages/reports/BatchReport";
+import InventoryReports from "./Pages/reports/InnventoryReports";
 
 
 
@@ -146,7 +147,10 @@ function App() {
         <Route path="/parent-dashboard" element={<ParentDashboard />} />
 
         {/* ADMIN */}
-        <Route element={<AdminLayout />}>
+        <Route element={<AdminLayout />}> 
+
+
+        <Route path="/admin/innventory-reports" element={<InventoryReports/>} />
 
 
            <Route path="/admin/reports" element={<Reports />} />

@@ -35,7 +35,7 @@ const Reports = () => {
       description:
         "View inventory items, available stock and inventory information.",
       icon: Package,
-      path: "/admin/reports/inventory",
+      path: "/admin/innventory-reports",
       category: "Inventory",
     },
     {
