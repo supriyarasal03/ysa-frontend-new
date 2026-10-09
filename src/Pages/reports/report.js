@@ -1,27 +1,12 @@
 import api from "../../api/axiosClient";
 
-// ======================================================
-// COMMON REPORT API SERVICE
-// ======================================================
+// ==================== BATCH REPORT ====================
 
-
-// ======================================================
-// BATCH REPORT
-// ======================================================
-
-// Get all batches for Batch Report
 export const getAllBatchesForReport = async () => {
   const response = await api.get("/batches");
-
   return response.data?.data ?? response.data;
 };
 
-
-// ======================================================
-// BATCH REPORT PDF
-// ======================================================
-
-// View Batch Report PDF
 export const viewBatchReportPdf = async (batchId) => {
   const response = await api.get(
     `/reports/batch/${batchId}/pdf`,
@@ -30,23 +15,19 @@ export const viewBatchReportPdf = async (batchId) => {
     }
   );
 
-  const pdfBlob = new Blob(
-    [response.data],
-    { type: "application/pdf" }
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
+      type: "application/pdf",
+    })
   );
 
-  const pdfUrl =
-    window.URL.createObjectURL(pdfBlob);
-
-  window.open(pdfUrl, "_blank");
+  window.open(url, "_blank");
 
   setTimeout(() => {
-    window.URL.revokeObjectURL(pdfUrl);
+    window.URL.revokeObjectURL(url);
   }, 1000);
 };
 
-
-// Download Batch Report PDF
 export const downloadBatchReportPdf = async (batchId) => {
   const response = await api.get(
     `/reports/batch/${batchId}/pdf`,
@@ -55,49 +36,26 @@ export const downloadBatchReportPdf = async (batchId) => {
     }
   );
 
-  const pdfBlob = new Blob(
-    [response.data],
-    { type: "application/pdf" }
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
+      type: "application/pdf",
+    })
   );
 
-  const pdfUrl =
-    window.URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
 
-  const link =
-    document.createElement("a");
-
-  link.href = pdfUrl;
-
-  link.download =
-    `batch-report-${batchId}.pdf`;
+  link.href = url;
+  link.download = `batch-report-${batchId}.pdf`;
 
   document.body.appendChild(link);
-
   link.click();
-
   document.body.removeChild(link);
 
-  window.URL.revokeObjectURL(pdfUrl);
+  window.URL.revokeObjectURL(url);
 };
 
 
-// ======================================================
-// INVENTORY REPORT
-// ======================================================
-
-// Get Inventory Report
-//
-// Supported periods:
-// DAILY
-// MONTHLY
-// YEARLY
-// CUSTOM
-//
-// Optional:
-// sportId
-// startDate
-// endDate
-// ======================================================
+// ==================== INVENTORY REPORT ====================
 
 export const getInventoryReport = async ({
   period = "DAILY",
@@ -105,42 +63,19 @@ export const getInventoryReport = async ({
   endDate,
   sportId,
 } = {}) => {
+  const params = { period };
 
-  const params = {
-    period,
-  };
-
-
-  if (startDate) {
-    params.startDate = startDate;
-  }
-
-
-  if (endDate) {
-    params.endDate = endDate;
-  }
-
-
-  if (sportId) {
-    params.sportId = sportId;
-  }
-
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
 
   const response = await api.get(
     "/reports/inventory",
-    {
-      params,
-    }
+    { params }
   );
-
 
   return response.data?.data ?? response.data;
 };
-
-
-// ======================================================
-// INVENTORY REPORT PDF - VIEW
-// ======================================================
 
 export const viewInventoryReportPdf = async ({
   period = "DAILY",
@@ -148,26 +83,11 @@ export const viewInventoryReportPdf = async ({
   endDate,
   sportId,
 } = {}) => {
+  const params = { period };
 
-  const params = {
-    period,
-  };
-
-
-  if (startDate) {
-    params.startDate = startDate;
-  }
-
-
-  if (endDate) {
-    params.endDate = endDate;
-  }
-
-
-  if (sportId) {
-    params.sportId = sportId;
-  }
-
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
 
   const response = await api.get(
     "/reports/inventory/pdf",
@@ -177,34 +97,18 @@ export const viewInventoryReportPdf = async ({
     }
   );
 
-
-  const pdfBlob = new Blob(
-    [response.data],
-    {
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
       type: "application/pdf",
-    }
+    })
   );
 
-
-  const pdfUrl =
-    window.URL.createObjectURL(pdfBlob);
-
-
-  window.open(
-    pdfUrl,
-    "_blank"
-  );
-
+  window.open(url, "_blank");
 
   setTimeout(() => {
-    window.URL.revokeObjectURL(pdfUrl);
+    window.URL.revokeObjectURL(url);
   }, 1000);
 };
-
-
-// ======================================================
-// INVENTORY REPORT PDF - DOWNLOAD
-// ======================================================
 
 export const downloadInventoryReportPdf = async ({
   period = "DAILY",
@@ -212,26 +116,11 @@ export const downloadInventoryReportPdf = async ({
   endDate,
   sportId,
 } = {}) => {
+  const params = { period };
 
-  const params = {
-    period,
-  };
-
-
-  if (startDate) {
-    params.startDate = startDate;
-  }
-
-
-  if (endDate) {
-    params.endDate = endDate;
-  }
-
-
-  if (sportId) {
-    params.sportId = sportId;
-  }
-
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
 
   const response = await api.get(
     "/reports/inventory/pdf",
@@ -241,33 +130,137 @@ export const downloadInventoryReportPdf = async ({
     }
   );
 
-
-  const pdfBlob = new Blob(
-    [response.data],
-    {
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
       type: "application/pdf",
+    })
+  );
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `inventory-report-${period.toLowerCase()}.pdf`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  window.URL.revokeObjectURL(url);
+
+
+
+
+   
+
+
+
+
+
+
+
+
+};
+
+
+
+
+// ==================== PLAYER ADMISSION REPORT ====================
+
+export const getPlayerAdmissionReport = async ({
+  period = "DAILY",
+  startDate,
+  endDate,
+  sportId,
+} = {}) => {
+  const params = {
+    period,
+  };
+
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
+
+  const response = await api.get(
+    "/reports/player-admission",
+    {
+      params,
     }
   );
 
-
-  const pdfUrl =
-    window.URL.createObjectURL(pdfBlob);
-
-
-  const link =
-    document.createElement("a");
+  return response.data?.data ?? response.data;
+};
 
 
-  link.href = pdfUrl;
+export const viewPlayerAdmissionReportPdf = async ({
+  period = "DAILY",
+  startDate,
+  endDate,
+  sportId,
+} = {}) => {
+  const params = {
+    period,
+  };
+
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
+
+  const response = await api.get(
+    "/reports/player-admission/pdf",
+    {
+      params,
+      responseType: "blob",
+    }
+  );
+
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
+      type: "application/pdf",
+    })
+  );
+
+  window.open(url, "_blank");
+
+  setTimeout(() => {
+    window.URL.revokeObjectURL(url);
+  }, 1000);
+};
 
 
-  const periodName =
-    period.toLowerCase();
+export const downloadPlayerAdmissionReportPdf = async ({
+  period = "DAILY",
+  startDate,
+  endDate,
+  sportId,
+} = {}) => {
+  const params = {
+    period,
+  };
 
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  if (sportId) params.sportId = sportId;
+
+  const response = await api.get(
+    "/reports/player-admission/pdf",
+    {
+      params,
+      responseType: "blob",
+    }
+  );
+
+  const url = window.URL.createObjectURL(
+    new Blob([response.data], {
+      type: "application/pdf",
+    })
+  );
+
+  const link = document.createElement("a");
+
+  link.href = url;
 
   link.download =
-    `inventory-report-${periodName}.pdf`;
-
+    `player-admission-report-${period.toLowerCase()}.pdf`;
 
   document.body.appendChild(link);
 
@@ -275,5 +268,15 @@ export const downloadInventoryReportPdf = async ({
 
   document.body.removeChild(link);
 
-  window.URL.revokeObjectURL(pdfUrl);
+  window.URL.revokeObjectURL(url);
 };
+
+
+
+
+
+
+
+
+
+

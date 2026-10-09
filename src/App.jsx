@@ -117,6 +117,8 @@ import PhysiotherapistForm
 import Reports from "./Pages/reports/Reports";
 import BatchReports from "./Pages/reports/BatchReport";
 import InventoryReports from "./Pages/reports/InnventoryReports";
+import PlayerAdmissionReport from "./Pages/reports/PlayerAdmissionReport";
+import EmployeeSalary from "./Pages/reports/EmployeeSalary";
 
 
 
@@ -151,6 +153,12 @@ function App() {
 
 
         <Route path="/admin/innventory-reports" element={<InventoryReports/>} />
+
+
+        <Route path="/admin/staff-salary-reports" element={<EmployeeSalary/>}  />
+
+
+          <Route path="admin/reports/player-admission-reports"  element={<PlayerAdmissionReport/>}  />
 
 
            <Route path="/admin/reports" element={<Reports />} />

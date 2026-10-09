@@ -43,15 +43,15 @@ const Reports = () => {
       description:
         "View player admission, enrollment and registration details.",
       icon: UserPlus,
-      path: "/admin/reports/player-admission",
+      path: "/admin/reports/player-admission-reports",
       category: "Players",
     },
     {
-      title: "Batch Attendance Report",
+      title: "Employee Salary Report  Report",
       description:
         "View player attendance details for academy batches.",
       icon: ClipboardCheck,
-      path: "/admin/reports/batch-attendance",
+      path: "/admin/staff-salary-reports",
       category: "Attendance",
     },
   ];
