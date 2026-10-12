@@ -895,15 +895,12 @@ experience:
       // JOINING DATE
       // -------------------------------------------------------
 
-     case "joiningDate":
-
+case "joiningDate":
   if (!val) {
     return "Joining date is required";
   }
 
-  const today = getTodayDate();
-
-  if (val < today) {
+  if (!isEditMode && val < getTodayDate()) {
     return "Joining date cannot be a past date";
   }
 
@@ -1387,6 +1384,9 @@ if (!/^\d+(\.\d{1,2})?$/.test(val)) {
       "ifscCode",
     ];
 
+
+    console.log("Validation errors:", newErrors);
+
     fields.forEach((field) => {
       const error = validateField(field, formData[field]);
 
@@ -1408,13 +1408,23 @@ if (!/^\d+(\.\d{1,2})?$/.test(val)) {
     requiredFiles.forEach(([key, label]) => {
 
       // Existing saved files are valid during edit.
-      if (
-        isEditMode &&
-        !files[key] &&
-        hasExistingFile(key)
-      ) {
-        return;
-      }
+
+
+      
+const existingFile =
+  key === "livePhoto"
+    ? existingFiles.livePhotoPath
+    : existingFiles[key];
+
+if (
+  isEditMode &&
+  !files[key] &&
+  existingFile
+) {
+  return;
+}
+
+
 
       const error = validateFile(
         files[key],
@@ -1511,6 +1521,14 @@ const resetCoachForm = () => {
     e.preventDefault();
 
     setBackendErrors({});
+
+
+    console.log("Update Coach clicked");
+console.log("Edit mode:", isEditMode, "Coach ID:", id);
+
+
+const isValid = validateAllFields();
+console.log("Form validation result:", isValid);
 
 
     // Validate frontend and focus the first invalid field.
@@ -1898,6 +1916,31 @@ if (isEditMode) {
           fieldErrors[field] = message;
         });
       }
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  console.log("Update Coach submit triggered");
+  console.log("Edit mode:", isEditMode);
+  console.log("Coach ID:", id);
+
+  setBackendErrors({});
+
+  const isValid = validateAllFields();
+
+  console.log("Form valid:", isValid);
+
+  if (!isValid) {
+    console.log("Validation errors:", errors);
+    // Keep your existing validation and focus logic here.
+    // Return only after that logic.
+  }
+};
+
+
+
 
       const message =
         String(backend?.message || error?.message || "");

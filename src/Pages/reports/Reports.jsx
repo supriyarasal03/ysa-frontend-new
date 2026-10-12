@@ -55,6 +55,25 @@ const Reports = () => {
       path: "/admin/staff-salary-reports",
       category: "Employees",
     },
+
+
+
+    {
+      title: "Profit Loss Report",
+      description:
+        "View overall Profit and Loss Reports.",
+      icon: ClipboardCheck,
+      path: "/admin/reports/profitloss",
+      category: "Employees",
+    },
+
+
+
+
+
+
+
+
   ];
 
   const handleReportClick = (path) => {

@@ -119,6 +119,9 @@ import BatchReports from "./Pages/reports/BatchReport";
 import InventoryReports from "./Pages/reports/InnventoryReports";
 import PlayerAdmissionReport from "./Pages/reports/PlayerAdmissionReport";
 import EmployeeSalary from "./Pages/reports/EmployeeSalary";
+import ProfitLoss from "./Pages/reports/Profitloss";
+
+
 
 
 
@@ -151,6 +154,11 @@ function App() {
         {/* ADMIN */}
         <Route element={<AdminLayout />}> 
 
+
+
+
+
+        <Route path="/admin/reports/profitloss" element={<ProfitLoss/>} />
 
         <Route path="/admin/innventory-reports" element={<InventoryReports/>} />
 
