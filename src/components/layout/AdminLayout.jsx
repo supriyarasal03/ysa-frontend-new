@@ -150,7 +150,7 @@ const AdminLayout = () => {
 
 
     {
-        name: "Reposts",
+        name: "Reports",
         path:"/admin/reports",
        icon: Package,
     },

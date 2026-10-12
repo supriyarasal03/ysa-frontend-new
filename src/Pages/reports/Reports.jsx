@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Box,
@@ -47,12 +48,12 @@ const Reports = () => {
       category: "Players",
     },
     {
-      title: "Employee Salary Report  Report",
+      title: "Employee Salary Report",
       description:
-        "View player attendance details for academy batches.",
+        "View employee salary details, payment records and salary reports.",
       icon: ClipboardCheck,
       path: "/admin/staff-salary-reports",
-      category: "Attendance",
+      category: "Employees",
     },
   ];
 
@@ -129,7 +130,7 @@ const Reports = () => {
 
       {/* ================= REPORT CARDS ================= */}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} alignItems="stretch">
         {reports.map((report) => {
           const Icon = report.icon;
 
@@ -138,15 +139,21 @@ const Reports = () => {
               item
               xs={12}
               sm={6}
-              lg={4}
+              lg={6}
               key={report.title}
+              sx={{
+                display: "flex",
+              }}
             >
               <Card
                 onClick={() => handleReportClick(report.path)}
                 sx={{
                   position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  width: "100%",
                   height: "100%",
-                  minHeight: 225,
+                  minHeight: 355,
                   cursor: "pointer",
                   borderRadius: "18px",
                   border: "1px solid #e2e8f0",
@@ -179,6 +186,9 @@ const Reports = () => {
                 <CardContent
                   sx={{
                     p: 3,
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
                     "&:last-child": {
                       pb: 3,
                     },
@@ -201,6 +211,7 @@ const Reports = () => {
                       sx={{
                         width: 58,
                         height: 58,
+                        flexShrink: 0,
                         borderRadius: "15px",
                         display: "flex",
                         alignItems: "center",
@@ -221,6 +232,7 @@ const Reports = () => {
                       sx={{
                         width: 36,
                         height: 36,
+                        flexShrink: 0,
                         borderRadius: "10px",
                         display: "flex",
                         alignItems: "center",
@@ -228,8 +240,7 @@ const Reports = () => {
                         color: "#64748b",
                         backgroundColor: "#f8fafc",
                         border: "1px solid #e2e8f0",
-                        transition:
-                          "all 0.25s ease",
+                        transition: "all 0.25s ease",
                       }}
                     >
                       <ArrowUpRight size={19} />
@@ -259,6 +270,8 @@ const Reports = () => {
                       fontWeight: 700,
                       color: "#0f172a",
                       mb: 1,
+                      lineHeight: 1.4,
+                      minHeight: "28px",
                     }}
                   >
                     {report.title}
@@ -281,8 +294,9 @@ const Reports = () => {
 
                   <Box
                     sx={{
-                      mt: 3,
+                      mt: "auto",
                       pt: 2,
+                      mt: 3,
                       borderTop: "1px solid #f1f5f9",
                       display: "flex",
                       alignItems: "center",

@@ -4,6 +4,7 @@ import {
   Box,
   Typography,
   Paper,
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -19,6 +20,7 @@ import {
 import {
   Eye,
   Download,
+    ArrowLeft,
 } from "lucide-react";
 
 import {
@@ -27,8 +29,15 @@ import {
   downloadBatchReportPdf,
 } from "./report";
 
+
+import { useNavigate } from "react-router-dom";
+
 const BatchReports = () => {
 
+
+    const navigate = useNavigate();
+
+  
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -167,6 +176,29 @@ const BatchReports = () => {
     >
 
       {/* PAGE HEADER */}
+
+
+
+
+
+       
+<Box sx={{ mb: 2 }}>
+  <Button
+    variant="outlined"
+    startIcon={<ArrowLeft size={18} />}
+    onClick={() => navigate("/admin/reports")}
+    sx={{
+      textTransform: "none",
+      borderRadius: 2,
+      fontWeight: 600,
+    }}
+  >
+    Back to Reports
+  </Button>
+</Box>
+
+
+
 
       <Box sx={{ mb: 3 }}>
 
