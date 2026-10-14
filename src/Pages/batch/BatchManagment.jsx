@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Search,
   Plus,
+    Trash2,
   Edit2,
   Power,
   Eye,
@@ -18,7 +19,8 @@ import {
   getAllBatches,
   deactivateBatch,
   activateBatch,
-} from "./batchService";
+  deleteBatch,
+} from "./BatchService";;
 
 export default function BatchManagement() {
   const navigate = useNavigate();
@@ -461,6 +463,55 @@ export default function BatchManagement() {
   // ==========================================================
   // STATUS CHANGE
   // ==========================================================
+
+
+
+
+// ==========================================================
+// PERMANENTLY DELETE BATCH
+// ==========================================================
+
+const handleDeleteBatch = async (batch) => {
+  if (!batch?.id) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `WARNING: Permanently delete "${batch.batchName}"?\n\n` +
+    "This action cannot be undone. Continue?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setActionLoadingId(batch.id);
+    setError("");
+
+    await deleteBatch(batch.id);
+
+    // Refresh the list after successful deletion
+    await loadBatches();
+
+    // Close the details modal if it shows the deleted batch
+    setViewBatch((current) =>
+      current?.id === batch.id ? null : current
+    );
+  } catch (err) {
+    console.error("Failed to permanently delete batch:", err);
+
+    setError(
+      err.message ||
+      "Failed to permanently delete batch."
+    );
+  } finally {
+    setActionLoadingId(null);
+  }
+};
+
+
+
 
   const handleStatusChange =
     async (
@@ -929,6 +980,21 @@ export default function BatchManagement() {
                           >
                             <Power className="w-4 h-4" />
                           </button>
+
+
+{/* PERMANENT DELETE */}
+<button
+  type="button"
+  onClick={() => handleDeleteBatch(batch)}
+  disabled={actionLoadingId === batch.id}
+  className="p-2 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition disabled:opacity-40"
+  title="Permanently Delete Batch"
+>
+  <Trash2 className="w-4 h-4" />
+</button>
+
+
+
 
                         </div>
 

@@ -1,19 +1,12 @@
-
 import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-} from "@mui/material";
+import { Box, Card, CardActionArea, Typography, Chip } from "@mui/material";
 
 import {
   BarChart3,
   Package,
   UserPlus,
   ClipboardCheck,
+  TrendingUp,
   ArrowUpRight,
 } from "lucide-react";
 
@@ -55,40 +48,21 @@ const Reports = () => {
       path: "/admin/staff-salary-reports",
       category: "Employees",
     },
-
-
-
     {
       title: "Profit Loss Report",
       description:
-        "View overall Profit and Loss Reports.",
-      icon: ClipboardCheck,
+        "View the overall profit and loss summary of the academy.",
+      icon: TrendingUp,
       path: "/admin/reports/profitloss",
-      category: "Employees",
+      category: "Finance",
     },
-
-
-
-
-
-
-
-
   ];
-
-  const handleReportClick = (path) => {
-    navigate(path);
-  };
 
   return (
     <Box
       sx={{
         minHeight: "100%",
-        p: {
-          xs: 2,
-          sm: 3,
-          md: 4,
-        },
+        p: { xs: 2, sm: 3, md: 4 },
         backgroundColor: "#f8fafc",
       }}
     >
@@ -106,10 +80,7 @@ const Reports = () => {
         <Box>
           <Typography
             sx={{
-              fontSize: {
-                xs: "28px",
-                md: "34px",
-              },
+              fontSize: { xs: "28px", md: "34px" },
               fontWeight: 700,
               color: "#0f172a",
               letterSpacing: "-0.5px",
@@ -119,12 +90,7 @@ const Reports = () => {
             Reports
           </Typography>
 
-          <Typography
-            sx={{
-              fontSize: "15px",
-              color: "#64748b",
-            }}
-          >
+          <Typography sx={{ fontSize: "15px", color: "#64748b" }}>
             Access and manage academy reports from one place.
           </Typography>
         </Box>
@@ -132,10 +98,7 @@ const Reports = () => {
         <Chip
           label={`${reports.length} Reports`}
           sx={{
-            display: {
-              xs: "none",
-              sm: "flex",
-            },
+            display: { xs: "none", sm: "flex" },
             height: 34,
             px: 1,
             borderRadius: "10px",
@@ -147,207 +110,191 @@ const Reports = () => {
         />
       </Box>
 
-      {/* ================= REPORT CARDS ================= */}
+      {/* ================= REPORT CARDS =================
+          CSS grid: every column has equal width and every
+          row has equal height, so all cards stay the same size.
+      ================================================== */}
 
-      <Grid container spacing={3} alignItems="stretch">
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, minmax(0, 1fr))",
+            lg: "repeat(3, minmax(0, 1fr))",
+          },
+          gridAutoRows: "1fr",
+          gap: 3,
+        }}
+      >
         {reports.map((report) => {
           const Icon = report.icon;
 
           return (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              lg={6}
+            <Card
               key={report.title}
               sx={{
-                display: "flex",
+                height: "100%",
+                borderRadius: "18px",
+                border: "1px solid #e2e8f0",
+                backgroundColor: "#ffffff",
+                boxShadow: "0 2px 6px rgba(15, 23, 42, 0.04)",
+                overflow: "hidden",
+                transition:
+                  "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  borderColor: "#bfdbfe",
+                  boxShadow: "0 14px 30px rgba(15, 23, 42, 0.10)",
+                  "& .report-arrow": {
+                    backgroundColor: "#2563eb",
+                    color: "#ffffff",
+                    borderColor: "#2563eb",
+                  },
+                },
               }}
             >
-              <Card
-                onClick={() => handleReportClick(report.path)}
+              <CardActionArea
+                onClick={() => navigate(report.path)}
                 sx={{
-                  position: "relative",
+                  height: "100%",
+                  minHeight: 260,
                   display: "flex",
                   flexDirection: "column",
-                  width: "100%",
-                  height: "100%",
-                  minHeight: 355,
-                  cursor: "pointer",
-                  borderRadius: "18px",
-                  border: "1px solid #e2e8f0",
-                  backgroundColor: "#ffffff",
-                  boxShadow:
-                    "0 2px 6px rgba(15, 23, 42, 0.04)",
-                  overflow: "hidden",
-
-                  transition:
-                    "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease",
-
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    borderColor: "#bfdbfe",
-                    boxShadow:
-                      "0 14px 30px rgba(15, 23, 42, 0.10)",
-
-                    "& .report-arrow": {
-                      transform: "translate(3px, -3px)",
-                      backgroundColor: "#2563eb",
-                      color: "#ffffff",
-                    },
-
-                    "& .report-icon": {
-                      transform: "scale(1.05)",
-                    },
-                  },
+                  alignItems: "stretch",
+                  justifyContent: "flex-start",
+                  p: 3,
                 }}
               >
-                <CardContent
+                {/* Top row: icon + arrow */}
+                <Box
                   sx={{
-                    p: 3,
                     display: "flex",
-                    flexDirection: "column",
-                    flex: 1,
-                    "&:last-child": {
-                      pb: 3,
-                    },
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    mb: 2.5,
                   }}
                 >
-                  {/* Top row */}
-
                   <Box
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 3,
-                    }}
-                  >
-                    {/* Icon */}
-
-                    <Box
-                      className="report-icon"
-                      sx={{
-                        width: 58,
-                        height: 58,
-                        flexShrink: 0,
-                        borderRadius: "15px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background:
-                          "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-                        color: "#2563eb",
-                        transition: "transform 0.25s ease",
-                      }}
-                    >
-                      <Icon size={28} strokeWidth={2} />
-                    </Box>
-
-                    {/* Arrow */}
-
-                    <Box
-                      className="report-arrow"
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        flexShrink: 0,
-                        borderRadius: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#64748b",
-                        backgroundColor: "#f8fafc",
-                        border: "1px solid #e2e8f0",
-                        transition: "all 0.25s ease",
-                      }}
-                    >
-                      <ArrowUpRight size={19} />
-                    </Box>
-                  </Box>
-
-                  {/* Category */}
-
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: "#2563eb",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.6px",
-                      mb: 0.8,
-                    }}
-                  >
-                    {report.category}
-                  </Typography>
-
-                  {/* Title */}
-
-                  <Typography
-                    sx={{
-                      fontSize: "20px",
-                      fontWeight: 700,
-                      color: "#0f172a",
-                      mb: 1,
-                      lineHeight: 1.4,
-                      minHeight: "28px",
-                    }}
-                  >
-                    {report.title}
-                  </Typography>
-
-                  {/* Description */}
-
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      lineHeight: 1.7,
-                      color: "#64748b",
-                      maxWidth: 390,
-                    }}
-                  >
-                    {report.description}
-                  </Typography>
-
-                  {/* Bottom action */}
-
-                  <Box
-                    sx={{
-                      mt: "auto",
-                      pt: 2,
-                      mt: 3,
-                      borderTop: "1px solid #f1f5f9",
+                      width: 56,
+                      height: 56,
+                      flexShrink: 0,
+                      borderRadius: "14px",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "space-between",
+                      justifyContent: "center",
+                      background:
+                        "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+                      color: "#2563eb",
                     }}
                   >
-                    <Typography
-                      sx={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#475569",
-                      }}
-                    >
-                      Open Report
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#2563eb",
-                      }}
-                    >
-                      View →
-                    </Typography>
+                    <Icon size={28} strokeWidth={2} />
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+
+                  <Box
+                    className="report-arrow"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      borderRadius: "10px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#64748b",
+                      backgroundColor: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      transition: "all 0.25s ease",
+                    }}
+                  >
+                    <ArrowUpRight size={19} />
+                  </Box>
+                </Box>
+
+                {/* Category */}
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "#2563eb",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.6px",
+                    mb: 0.8,
+                  }}
+                >
+                  {report.category}
+                </Typography>
+
+                {/* Title: fixed 2-line area so all titles align */}
+                <Typography
+                  sx={{
+                    fontSize: "19px",
+                    fontWeight: 700,
+                    color: "#0f172a",
+                    lineHeight: 1.35,
+                    mb: 1,
+                    minHeight: "52px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {report.title}
+                </Typography>
+
+                {/* Description: clamped to 3 lines */}
+                <Typography
+                  sx={{
+                    fontSize: "14px",
+                    lineHeight: 1.65,
+                    color: "#64748b",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {report.description}
+                </Typography>
+
+                {/* Footer pinned to the bottom */}
+                <Box
+                  sx={{
+                    mt: "auto",
+                    pt: 2,
+                    borderTop: "1px solid #f1f5f9",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#475569",
+                    }}
+                  >
+                    Open Report
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#2563eb",
+                    }}
+                  >
+                    View →
+                  </Typography>
+                </Box>
+              </CardActionArea>
+            </Card>
           );
         })}
-      </Grid>
+      </Box>
     </Box>
   );
 };

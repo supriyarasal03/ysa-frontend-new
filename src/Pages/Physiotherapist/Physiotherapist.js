@@ -130,10 +130,21 @@ export const getPhysiotherapistErrorMessage = (
 };
 
 
+
+
+export const deletePhysiotherapist = async (id) => {
+  const response = await axiosClient.delete(
+    `/physiotherapists/${id}`
+  );
+
+  return response.data;
+};
+
+
+
 // ============================================================
 // DEFAULT EXPORT
 // ============================================================
-
 export default {
   addPhysiotherapist,
   getAllPhysiotherapists,
@@ -141,7 +152,13 @@ export default {
   updatePhysiotherapist,
   activatePhysiotherapist,
   deactivatePhysiotherapist,
+  deletePhysiotherapist,
   getPhysiotherapistDocument,
   getPhysiotherapistDocumentUrl,
   getPhysiotherapistErrorMessage,
 };
+
+
+ // ============================================================
+ // DELETE
+ // ============================================================

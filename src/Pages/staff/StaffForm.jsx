@@ -96,7 +96,7 @@ const StaffForm = () => {
     dateOfBirth: "",
     gender: "",
     address: "",
- joiningDate: new Date().toISOString().split("T")[0],
+joiningDate: "",
     highestQualification: "",
     experienceYears: "",
     salary: "",

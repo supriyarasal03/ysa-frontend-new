@@ -205,3 +205,25 @@ export const getAvailableCoaches = async ({
     );
   }
 };
+
+
+
+
+// ==========================================================
+// PERMANENTLY DELETE BATCH
+// ==========================================================
+
+export const deleteBatch = async (id) => {
+  try {
+    const res = await api.delete(
+      `/batches/${id}/delete`
+    );
+
+    return res.data;
+  } catch (error) {
+    handleApiError(
+      error,
+      "Failed to permanently delete batch"
+    );
+  }
+};

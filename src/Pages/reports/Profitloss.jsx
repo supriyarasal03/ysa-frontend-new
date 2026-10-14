@@ -1,5 +1,8 @@
 
 import React, { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   Wallet,
   TrendingUp,
@@ -51,6 +54,8 @@ const ProfitLoss = () => {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleGenerateReport = async () => {
     let reportStartDate = startDate;
@@ -146,20 +151,40 @@ const ProfitLoss = () => {
 
   const isProfit = Number(report?.netProfitOrLoss ?? 0) >= 0;
 
+
+
+
+
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl">
         {/* Page heading */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 md:text-3xl">
-            Profit &amp; Loss Report
-          </h1>
 
-          <p className="mt-2 text-sm text-slate-500 md:text-base">
-            View academy income, inventory profit, physiotherapy
-            fees, salary expenses, and net profit or loss.
-          </p>
-        </div>
+
+
+{/* Page heading */}
+<div className="mb-6">
+  <button
+    type="button"
+    onClick={() => navigate("/admin/reports")}
+    className="mb-4 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+  >
+    <ArrowLeft size={18} />
+    Back to Reports
+  </button>
+
+  <h1 className="text-2xl font-bold tracking-tight text-slate-800 md:text-3xl">
+    Profit &amp; Loss Report
+  </h1>
+
+  <p className="mt-2 text-sm text-slate-500 md:text-base">
+    View academy income, inventory profit, physiotherapy
+    fees, salary expenses, and net profit or loss.
+  </p>
+</div>
+
+
+
 
         {/* Date filter */}
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">

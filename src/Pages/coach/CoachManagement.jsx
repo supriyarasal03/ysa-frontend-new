@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Search,
   Plus,
+    Trash2,
   Edit2,
   Eye,
   ChevronLeft,
@@ -30,6 +31,7 @@ import {
   getCoachById,
   viewCoachFile,
   downloadCoachFile,
+  deleteCoach,
 } from "./CoachService";
 
 const API_BASE = "";
@@ -47,6 +49,9 @@ export default function CoachManagement() {
 
   const itemsPerPage = 8;
 
+
+  const [deletingCoachId, setDeletingCoachId] = useState(null);
+
   const [coachList, setCoachList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,6 +68,77 @@ export default function CoachManagement() {
   const [viewLoading, setViewLoading] = useState(false);
   const [viewPhotoUrl, setViewPhotoUrl] = useState(null);
   const [coachPhotoUrls, setCoachPhotoUrls] = useState({});
+
+
+
+
+
+
+const handleDeleteCoach = async (coach) => {
+  if (!coach?.id) {
+    alert("Invalid coach selected.");
+    return;
+  }
+
+  const coachName =
+    `${coach.firstName || ""} ${coach.lastName || ""}`.trim() ||
+    coach.name ||
+    `Coach #${coach.id}`;
+
+  const confirmed = window.confirm(
+    `Are you sure you want to permanently delete ${coachName}?\n\n` +
+    "The coach's login and related records will be deleted. " +
+    "Batches will remain without an assigned coach, and player data will be preserved."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  setDeletingCoachId(coach.id);
+
+  try {
+    await deleteCoach(coach.id);
+
+    // Remove the deleted coach's photo URL from memory.
+    setCoachPhotoUrls((previous) => {
+      const updated = { ...previous };
+      const photoUrl = updated[coach.id];
+
+      if (photoUrl) {
+        window.URL.revokeObjectURL(photoUrl);
+      }
+
+      delete updated[coach.id];
+      return updated;
+    });
+
+    // Close the details modal if it shows the deleted coach.
+    if (viewCoach?.id === coach.id) {
+      closeView();
+    }
+
+    alert("Coach deleted successfully.");
+
+    // Refresh the list from the backend.
+    await loadCoaches();
+  } catch (err) {
+    console.error("Failed to delete coach:", err);
+
+    alert(
+      err.response?.data?.message ||
+      err.message ||
+      "Failed to delete coach. Please try again."
+    );
+  } finally {
+    setDeletingCoachId(null);
+  }
+};
+
+
+
+
+
 
 
 
@@ -1096,6 +1172,25 @@ const photoUrl =
                             )}
 
                           </button>
+
+
+
+
+<button
+  type="button"
+  onClick={() => handleDeleteCoach(coach)}
+  disabled={deletingCoachId === coach.id}
+  title="Delete coach"
+  aria-label={`Delete ${coach.firstName || ""} ${coach.lastName || ""}`}
+  className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  <Trash2 className="h-4 w-4" />
+</button>
+
+
+
+
+
 
                         </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,7 +13,7 @@ import {
   getBatchById,
   getSports,
   getAvailableCoaches,
-} from "./batchService";
+} from "./BatchService";
 
 const DAYS = [
   { key: "MONDAY", label: "Mon" },
@@ -2096,23 +2097,28 @@ export default function BatchForm() {
                   DISCOUNT
                 </label>
 
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  name="discount"
-                  value={
-                    formData.discount
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="0"
-                  className={`w-full h-11 px-4 border rounded-xl text-sm ${
-                    errors.discount
-                      ? "border-red-500"
-                      : "border-slate-200"
-                  }`}
-                />
+ 
+<div className="relative">
+  <input
+    type="text"
+    inputMode="decimal"
+    name="discount"
+    value={formData.discount}
+    onChange={handleChange}
+    placeholder="0"
+    className={`w-full h-11 px-4 pr-10 border rounded-xl text-sm ${
+      errors.discount
+        ? "border-red-500"
+        : "border-slate-200"
+    }`}
+  />
+
+  {formData.discount !== "" && (
+    <span className="absolute left-10 top-1/2 -translate-y-1/2 text-sm text-slate-900 pointer-events-none">
+      %
+    </span>
+  )}
+</div>
 
                 <p className="mt-1.5 text-xs text-slate-400">
                   Enter 0 if no discount is applicable.

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
 import {
-  LayoutDashboard,
   LogOut,
   Menu,
   UserCheck,
+  X,
 } from "lucide-react";
 
 import {
@@ -16,7 +16,9 @@ import {
 
 const PlayerLayout = () => {
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Closed by default (mobile). On desktop (lg+) it is always visible via CSS.
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
 
   const navigate = useNavigate();
 
@@ -39,22 +41,18 @@ const PlayerLayout = () => {
   // ==========================================================
 
   const navigationItems = [
+
     {
       name: "My Attendance",
       path: "/player/attendance",
       icon: UserCheck,
     },
 
-
-
-     {
+    {
       name: "Injury Mail",
       path: "/player/injury-mail",
       icon: UserCheck,
     },
-
-
-
 
   ];
 
@@ -65,131 +63,91 @@ const PlayerLayout = () => {
 
   return (
 
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f3f6fa",
-        display: "flex",
-      }}
-    >
+    <div className="flex h-screen bg-gray-50 font-sans">
+
 
       {/* =====================================================
           SIDEBAR
-      ====================================================== */}
+          Mobile  : hidden, slides in when menu button clicked
+          Desktop : always visible, fixed (does not scroll)
+      ===================================================== */}
 
       <aside
-        style={{
-          width: sidebarOpen ? "270px" : "80px",
-          background: "#0d172c",
-          color: "#fff",
-          minHeight: "100vh",
-          transition: "width 0.2s ease",
-          display: "flex",
-          flexDirection: "column",
-          position: "fixed",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: 1000,
-        }}
+        className={`
+          fixed inset-y-0 left-0 z-50 flex w-72 flex-col
+          bg-[#0f172a] text-white
+          transform transition-transform duration-300 ease-in-out
+          ${
+            sidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+          lg:static lg:translate-x-0
+        `}
       >
 
-        {/* =================================================
-            LOGO
-        ================================================= */}
 
-        <div
-          style={{
-            padding: "28px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-            borderBottom:
-              "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
+        {/* ===================================================
+            BRAND
+        =================================================== */}
 
-          <div
-            style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              background: "#2864e8",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "24px",
-              fontWeight: "700",
-              flexShrink: 0,
-            }}
-          >
-            Y
-          </div>
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-700/50 px-6 py-5">
 
+          <div className="flex min-w-0 items-center gap-3">
 
-          {sidebarOpen && (
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold shadow-md">
 
-            <div>
-
-              <div
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                }}
-              >
-                Yashashree Sports
-              </div>
-
-
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#8ca1c0",
-                  marginTop: "4px",
-                }}
-              >
-                Player Panel
-              </div>
+              Y
 
             </div>
 
-          )}
+            <div className="min-w-0">
+
+              <h1 className="text-base font-semibold tracking-wide">
+                Yashashree Sports
+              </h1>
+
+              <p className="text-xs text-slate-400">
+                Player Panel
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="button"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
+          >
+
+            <X className="h-5 w-5" />
+
+          </button>
 
         </div>
 
 
-        {/* =================================================
-            SIDEBAR MENU
-        ================================================= */}
+        {/* ===================================================
+            NAVIGATION
+            (scrolls inside the sidebar only on very short screens)
+        =================================================== */}
 
-        <nav
-          style={{
-            padding: "24px 16px",
-            flex: 1,
-          }}
-        >
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
 
-          <div
-            style={{
-              color: "#7184a3",
-              fontSize: "12px",
-              marginBottom: "14px",
-              paddingLeft: sidebarOpen
-                ? "20px"
-                : "0",
-              textAlign: sidebarOpen
-                ? "left"
-                : "center",
-            }}
-          >
-            {sidebarOpen ? "OVERVIEW" : "•••"}
-          </div>
+          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+
+            Overview
+
+          </p>
 
 
           {navigationItems.map((item) => {
 
             const Icon = item.icon;
-
 
             return (
 
@@ -197,46 +155,29 @@ const PlayerLayout = () => {
                 key={item.path}
                 to={item.path}
                 end
-                style={({ isActive }) => ({
-
-                  display: "flex",
-
-                  alignItems: "center",
-
-                  justifyContent: sidebarOpen
-                    ? "flex-start"
-                    : "center",
-
-                  gap: "14px",
-
-                  padding: "14px 18px",
-
-                  marginBottom: "7px",
-
-                  borderRadius: "10px",
-
-                  textDecoration: "none",
-
-                  color: isActive
-                    ? "#fff"
-                    : "#c4d0e2",
-
-                  background: isActive
-                    ? "#2864e8"
-                    : "transparent",
-
-                  fontSize: "15px",
-
-                  fontWeight: isActive
-                    ? "600"
-                    : "500",
-
-                })}
+                onClick={() =>
+                  setSidebarOpen(false)
+                }
+                className={({ isActive }) =>
+                  `
+                  flex items-center gap-3
+                  rounded-xl px-3 py-2.5
+                  text-sm font-medium
+                  transition-all duration-200
+                  ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }
+                  `
+                }
               >
 
-                <Icon size={21} />
+                <Icon className="h-5 w-5 shrink-0" />
 
-                {sidebarOpen && item.name}
+                <span>
+                  {item.name}
+                </span>
 
               </NavLink>
 
@@ -247,43 +188,28 @@ const PlayerLayout = () => {
         </nav>
 
 
-        {/* =================================================
-            LOGOUT
-        ================================================= */}
+        {/* ===================================================
+            LOGOUT (pinned to bottom)
+        =================================================== */}
 
-        <div
-          style={{
-            padding: "18px 16px 24px",
-            borderTop:
-              "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
+        <div className="shrink-0 border-t border-slate-700/50 p-4">
 
           <button
             type="button"
             onClick={handleLogout}
-            style={{
-              width: "100%",
-              border: "none",
-              borderRadius: "10px",
-              padding: "14px",
-              background: "#1d2a40",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: sidebarOpen
-                ? "flex-start"
-                : "center",
-              gap: "12px",
-              fontSize: "15px",
-              fontWeight: "500",
-            }}
+            className="
+              flex w-full items-center
+              justify-center gap-2
+              rounded-xl bg-slate-800
+              py-2.5 text-sm font-medium
+              transition-colors
+              hover:bg-slate-700
+            "
           >
 
-            <LogOut size={20} />
+            <LogOut className="h-4 w-4" />
 
-            {sidebarOpen && "Logout"}
+            Logout
 
           </button>
 
@@ -293,108 +219,84 @@ const PlayerLayout = () => {
 
 
       {/* =====================================================
-          MAIN AREA
-      ====================================================== */}
+          MAIN CONTENT
+      ===================================================== */}
 
-      <main
-        style={{
-          marginLeft: sidebarOpen
-            ? "270px"
-            : "80px",
-
-          width: "100%",
-
-          minHeight: "100vh",
-
-          transition: "margin-left 0.2s ease",
-        }}
-      >
-
-        {/* =================================================
-            HEADER
-        ================================================= */}
-
-        <header
-          style={{
-            height: "82px",
-            background: "#fff",
-            borderBottom:
-              "1px solid #e8edf3",
-
-            display: "flex",
-
-            alignItems: "center",
-
-            padding: "0 30px",
-
-            boxSizing: "border-box",
-
-            gap: "18px",
-          }}
-        >
-
-          <button
-            type="button"
-            onClick={() =>
-              setSidebarOpen(
-                (previous) => !previous
-              )
-            }
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              padding: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-
-            <Menu
-              size={23}
-              color="#596b84"
-            />
-
-          </button>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
 
-          <div>
+        {/* ===================================================
+            TOP HEADER
+        =================================================== */}
 
-            <h2
-              style={{
-                margin: 0,
-                color: "#07152f",
-                fontSize: "30px",
-                fontWeight: "600",
-              }}
+        <header className="sticky top-0 z-30 flex items-center border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
+
+          <div className="flex min-w-0 items-center gap-3">
+
+            {/* THREE LINE BUTTON - top left on mobile */}
+
+            <button
+              type="button"
+              aria-label="Open sidebar"
+              onClick={() =>
+                setSidebarOpen(true)
+              }
+              className="shrink-0 rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
             >
-              Welcome, Player
-            </h2>
+
+              <Menu className="h-6 w-6" />
+
+            </button>
 
 
-            <p
-              style={{
-                margin: "5px 0 0",
-                color: "#71849e",
-                fontSize: "14px",
-              }}
-            >
-              Manage your attendance and training
-            </p>
+            <div className="min-w-0">
+
+              <h2 className="break-words text-lg font-semibold leading-snug text-gray-900 sm:text-2xl">
+
+                Welcome, Player
+
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+
+                Manage your attendance and training
+
+              </p>
+
+            </div>
 
           </div>
 
         </header>
 
 
-        {/* =================================================
+        {/* ===================================================
             PAGE CONTENT
-        ================================================= */}
+        =================================================== */}
 
-        <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
 
-      </main>
+          <Outlet />
+
+        </main>
+
+      </div>
+
+
+      {/* =====================================================
+          MOBILE OVERLAY
+      ===================================================== */}
+
+      {sidebarOpen && (
+
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() =>
+            setSidebarOpen(false)
+          }
+        />
+
+      )}
 
     </div>
 

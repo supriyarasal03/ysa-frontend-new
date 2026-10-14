@@ -771,6 +771,21 @@ const [
       }));
     };
 
+
+
+const getMaxBirthDate = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1); // yesterday
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+
+
     const removeFile = (key) => {
       if (previews[key]?.startsWith("blob:")) {
         URL.revokeObjectURL(previews[key]);
@@ -2172,13 +2187,18 @@ const [
 
                           <div>
                             <label className={fieldLabel}>Date of Birth *</label>
-                            <input
-                              name="dateOfBirth"
-                              type="date"
-                              value={form.dateOfBirth}
-                              onChange={handleChange}
-                              className={inputClass("dateOfBirth")}
-                            />
+
+<input
+  name="dateOfBirth"
+  type="date"
+  value={form.dateOfBirth}
+  max={getMaxBirthDate()}
+  onChange={handleChange}
+  className={inputClass("dateOfBirth")}
+/>
+
+
+
                             {errorText("dateOfBirth")}
                             {age !== null && (
                               <div className={`mt-2 inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold ${

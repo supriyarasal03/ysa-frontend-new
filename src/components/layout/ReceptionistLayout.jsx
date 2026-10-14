@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
+  Outlet,
+  NavLink,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import {
   Users,
   CreditCard,
   Calendar,
   LogOut,
   Menu,
+  X,
   Bell,
   Clock,
   UserPlus,
@@ -15,151 +20,176 @@ import {
 } from "lucide-react";
 import ReceptionistAttendanceService from "../../Pages/receptionist/ReceptionistAttendanceService";
 
+// ============================================================
+// CONSTANTS
+// ============================================================
+
+const MOBILE_BREAKPOINT = 768;
+
+const SIDEBAR_WIDTH = 270;
+const SIDEBAR_COLLAPSED_WIDTH = 80;
+
+// ============================================================
+// HOOK: IS MOBILE SCREEN
+// ============================================================
+
+const useIsMobile = () => {
+  const getValue = () =>
+    typeof window !== "undefined" &&
+    window.innerWidth < MOBILE_BREAKPOINT;
+
+  const [isMobile, setIsMobile] = useState(getValue);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(getValue());
+
+    window.addEventListener("resize", handleResize);
+
+    return () =>
+      window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+};
+
+// ============================================================
+// COMPONENT
+// ============================================================
 
 const ReceptionistLayout = () => {
+  const isMobile = useIsMobile();
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+  // Desktop: sidebar open (expanded) by default.
+  // Mobile: sidebar hidden by default.
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => window.innerWidth >= MOBILE_BREAKPOINT
+  );
 
-  const [todayAttendance, setTodayAttendance] =
-    useState(null);
-
-  const [attendanceLoading, setAttendanceLoading] =
-    useState(true);
-
+  const [todayAttendance, setTodayAttendance] = useState(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(true);
   const [attendanceActionLoading, setAttendanceActionLoading] =
     useState(false);
 
   const navigate = useNavigate();
-
+  const location = useLocation();
 
   // ==========================================================
   // NAVIGATION ITEMS
   // ==========================================================
 
   const navItems = [
-
-
     {
       name: "Players",
       path: "/receptionist/players",
       icon: Users,
     },
-
     {
       name: "Fees Collection",
       path: "/receptionist/fees",
       icon: CreditCard,
     },
-
-
     {
-  name: "Leave",
-  path: "/receptionist/leave",
-  icon: Calendar,
-},
-
-
-{
-  name: "Player Enquiries",
-  path: "/receptionist/player-enquiries",
-  icon: UserPlus,
-},
-
-
-
-{
-  name: "Contact Enquiries",
-  path: "/receptionist/ContactEnquiries",
-  icon: Mail,
-},
-
-
-
-{
-  name: "Batch Change",
-  path: "/receptionist/batch-change",
-  icon: ArrowRightLeft,
-},
-
+      name: "Leave",
+      path: "/receptionist/leave",
+      icon: Calendar,
+    },
+    {
+      name: "Player Enquiries",
+      path: "/receptionist/player-enquiries",
+      icon: UserPlus,
+    },
+    {
+      name: "Contact Enquiries",
+      path: "/receptionist/ContactEnquiries",
+      icon: Mail,
+    },
+    {
+      name: "Batch Change",
+      path: "/receptionist/batch-change",
+      icon: ArrowRightLeft,
+    },
   ];
 
+  // ==========================================================
+  // SCREEN SIZE CHANGE
+  // Mobile  -> hide sidebar
+  // Desktop -> show sidebar
+  // ==========================================================
+
+  useEffect(() => {
+    setSidebarOpen(!isMobile);
+  }, [isMobile]);
+
+  // ==========================================================
+  // CLOSE SIDEBAR AFTER NAVIGATION ON MOBILE
+  // ==========================================================
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname, isMobile]);
+
+  // ==========================================================
+  // LOCK PAGE SCROLL WHILE MOBILE DRAWER IS OPEN
+  // ==========================================================
+
+  useEffect(() => {
+    if (isMobile && sidebarOpen) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+  }, [isMobile, sidebarOpen]);
 
   // ==========================================================
   // LOGOUT
   // ==========================================================
 
   const handleLogout = () => {
-
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
     navigate("/login");
-
   };
-
 
   // ==========================================================
   // LOAD TODAY ATTENDANCE
   // ==========================================================
 
   const loadTodayAttendance = async () => {
-
     try {
-
       setAttendanceLoading(true);
 
       const response =
-        await ReceptionistAttendanceService
-          .getTodayAttendance();
+        await ReceptionistAttendanceService.getTodayAttendance();
 
       setTodayAttendance(response);
-
     } catch (error) {
-
       if (error?.response?.status === 404) {
-
         setTodayAttendance(null);
-
       } else {
-
-        console.error(
-          "Today's attendance loading error:",
-          error
-        );
-
+        console.error("Today's attendance loading error:", error);
       }
-
     } finally {
-
       setAttendanceLoading(false);
-
     }
-
   };
 
-
-  // ==========================================================
-  // INITIAL ATTENDANCE LOAD
-  // ==========================================================
-
   useEffect(() => {
-
     loadTodayAttendance();
-
   }, []);
-
 
   // ==========================================================
   // ATTENDANCE UPDATE EVENT
   // ==========================================================
 
   useEffect(() => {
-
     const handleAttendanceUpdated = () => {
-
       loadTodayAttendance();
-
     };
 
     window.addEventListener(
@@ -168,91 +198,41 @@ const ReceptionistLayout = () => {
     );
 
     return () => {
-
       window.removeEventListener(
         "attendanceUpdated",
         handleAttendanceUpdated
       );
-
     };
-
   }, []);
-
 
   // ==========================================================
   // PUNCH IN / PUNCH OUT
   // ==========================================================
 
   const handleAttendance = async () => {
-
     try {
-
       setAttendanceActionLoading(true);
 
-
-      // ------------------------------------------------------
-      // NO RECORD
-      // ------------------------------------------------------
-
       if (!todayAttendance) {
-
+        // No record yet -> punch in
         await ReceptionistAttendanceService.punchIn();
-
-      }
-
-
-      // ------------------------------------------------------
-      // PUNCH OUT
-      // ------------------------------------------------------
-
-      else if (
+      } else if (
         todayAttendance.punchInTime &&
         !todayAttendance.punchOutTime
       ) {
-
+        // Already punched in -> punch out
         await ReceptionistAttendanceService.punchOut();
-
-      }
-
-
-      // ------------------------------------------------------
-      // AFTER PUNCH OUT
-      // ------------------------------------------------------
-
-      else {
-
+      } else {
+        // Already punched out
         return;
-
       }
-
-
-      // ------------------------------------------------------
-      // REFRESH SIDEBAR STATE
-      // ------------------------------------------------------
 
       await loadTodayAttendance();
 
-
-      // ------------------------------------------------------
-      // TELL ATTENDANCE PAGE TO REFRESH
-      // ------------------------------------------------------
-
-      window.dispatchEvent(
-        new Event("attendanceUpdated")
-      );
-
-
+      // Tell the attendance page to refresh
+      window.dispatchEvent(new Event("attendanceUpdated"));
     } catch (error) {
-
-      console.error(
-        "Attendance action error:",
-        error
-      );
-
-
-      // ------------------------------------------------------
-      // SHOW BACKEND MESSAGE
-      // ------------------------------------------------------
+      console.error("Attendance action error:", error);
 
       const message =
         error?.response?.data?.message ||
@@ -260,94 +240,60 @@ const ReceptionistLayout = () => {
 
       alert(message);
 
-
-      // ------------------------------------------------------
-      // REFRESH STATE
-      // ------------------------------------------------------
-
       await loadTodayAttendance();
-
-
     } finally {
-
       setAttendanceActionLoading(false);
-
     }
-
   };
 
-
-  // ==========================================================
-  // BUTTON VISIBILITY
   // Punch In -> Punch Out -> Hide
-  // ==========================================================
-
   const shouldShowAttendanceButton = () => {
-
-    if (attendanceLoading) {
-
-      return true;
-
-    }
-
-    if (!todayAttendance) {
-
-      return true;
-
-    }
+    if (attendanceLoading) return true;
+    if (!todayAttendance) return true;
 
     return !!(
       todayAttendance.punchInTime &&
       !todayAttendance.punchOutTime
     );
-
   };
 
-
-  // ==========================================================
-  // BUTTON TEXT
-  // ==========================================================
-
   const getAttendanceButtonText = () => {
-
-    if (attendanceActionLoading) {
-
-      return "Processing...";
-
-    }
-
-    if (attendanceLoading) {
-
-      return "Punch In";
-
-    }
-
-    if (!todayAttendance) {
-
-      return "Punch In";
-
-    }
+    if (attendanceActionLoading) return "Processing...";
+    if (attendanceLoading) return "Punch In";
+    if (!todayAttendance) return "Punch In";
 
     if (
       todayAttendance.punchInTime &&
       !todayAttendance.punchOutTime
     ) {
-
       return "Punch Out";
-
     }
 
     return "Punch In";
-
   };
 
+  // ==========================================================
+  // LAYOUT VALUES
+  // ==========================================================
+
+  // On mobile the labels are always shown inside the drawer.
+  const showLabels = isMobile ? true : sidebarOpen;
+
+  const desktopSidebarWidth = sidebarOpen
+    ? SIDEBAR_WIDTH
+    : SIDEBAR_COLLAPSED_WIDTH;
+
+  const sidebarWidth = isMobile
+    ? "min(290px, 85vw)"
+    : `${desktopSidebarWidth}px`;
+
+  const mainMarginLeft = isMobile ? 0 : desktopSidebarWidth;
 
   // ==========================================================
   // UI
   // ==========================================================
 
   return (
-
     <div
       style={{
         minHeight: "100vh",
@@ -355,44 +301,82 @@ const ReceptionistLayout = () => {
         display: "flex",
       }}
     >
+      {/* ====================================================
+          MOBILE BACKDROP
+          Click outside the drawer to close it.
+      ==================================================== */}
 
+      {isMobile && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(7, 21, 47, 0.55)",
+            zIndex: 999,
+            opacity: sidebarOpen ? 1 : 0,
+            pointerEvents: sidebarOpen ? "auto" : "none",
+            transition: "opacity 0.25s ease",
+          }}
+        />
+      )}
 
       {/* ====================================================
           SIDEBAR
+          Desktop: fixed, collapsible
+          Mobile : full-height slide-in drawer
       ==================================================== */}
 
       <aside
         style={{
-          width: sidebarOpen ? "270px" : "80px",
+          width: sidebarWidth,
+
           background: "#0d172c",
           color: "#fff",
-          minHeight: "100vh",
-          transition: "width 0.2s ease",
+
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+
+          // 100dvh avoids the mobile-browser address-bar gap
+          // that leaves empty space under the Logout button.
+          height: "100dvh",
+
           display: "flex",
           flexDirection: "column",
-          position: "fixed",
-          left: 0,
-          top: 0,
-          bottom: 0,
+
           zIndex: 1000,
+          overflow: "hidden",
+
+          transform:
+            isMobile && !sidebarOpen
+              ? "translateX(-100%)"
+              : "translateX(0)",
+
+          transition: "transform 0.28s ease, width 0.2s ease",
+
+          boxShadow:
+            isMobile && sidebarOpen
+              ? "8px 0 30px rgba(0,0,0,0.35)"
+              : "none",
         }}
       >
-
-
         {/* ==================================================
             LOGO
         ================================================== */}
 
         <div
           style={{
-            padding: "28px 24px",
+            padding: isMobile ? "20px 18px" : "28px 24px",
             display: "flex",
             alignItems: "center",
             gap: "14px",
             borderBottom: "1px solid rgba(255,255,255,0.08)",
+            flexShrink: 0,
           }}
         >
-
           <div
             style={{
               width: "48px",
@@ -410,13 +394,15 @@ const ReceptionistLayout = () => {
             Y
           </div>
 
-          {sidebarOpen && (
-            <div>
-
+          {showLabels && (
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div
                 style={{
                   fontSize: "18px",
                   fontWeight: "600",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 Yashree Sports
@@ -431,45 +417,60 @@ const ReceptionistLayout = () => {
               >
                 Receptionist Panel
               </div>
-
             </div>
           )}
 
+          {/* CLOSE BUTTON (mobile only) */}
+          {isMobile && (
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
+              style={{
+                border: "none",
+                background: "rgba(255,255,255,0.08)",
+                color: "#fff",
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-
         {/* ==================================================
-            NAVIGATION
+            NAVIGATION (scrolls when there are many items)
         ================================================== */}
 
         <nav
           style={{
-            padding: "24px 16px",
+            padding: "20px 14px",
             flex: 1,
+            minHeight: 0,
             overflowY: "auto",
+            overflowX: "hidden",
+            scrollbarWidth: "thin",
+            overscrollBehavior: "contain",
           }}
         >
-
-
-          {/* =================================================
-              ATTENDANCE BUTTON
-              ABOVE OVERVIEW
-          ================================================= */}
+          {/* ATTENDANCE BUTTON */}
 
           {shouldShowAttendanceButton() && (
-
-            <div
-              style={{
-                padding: "18px 0 0",
-                marginBottom: "24px",
-              }}
-            >
-
+            <div style={{ marginBottom: "22px" }}>
               <button
+                type="button"
                 onClick={handleAttendance}
                 disabled={attendanceActionLoading}
+                title={!showLabels ? getAttendanceButtonText() : undefined}
                 style={{
-                  width: "60%",
+                  width: showLabels ? "70%" : "100%",
                   border: "none",
                   borderRadius: "10px",
                   padding: "12px 14px",
@@ -484,63 +485,45 @@ const ReceptionistLayout = () => {
                   gap: "10px",
                   fontSize: "15px",
                   fontWeight: "600",
-                  opacity: attendanceActionLoading
-                    ? 0.7
-                    : 1,
+                  opacity: attendanceActionLoading ? 0.7 : 1,
                 }}
               >
+                <Clock size={19} style={{ flexShrink: 0 }} />
 
-                <Clock size={19} />
-
-                {getAttendanceButtonText()}
-
+                {showLabels && getAttendanceButtonText()}
               </button>
-
             </div>
-
           )}
 
-
-          {/* =================================================
-              OVERVIEW
-          ================================================= */}
+          {/* OVERVIEW */}
 
           <div
             style={{
               color: "#7184a3",
               fontSize: "12px",
               marginBottom: "14px",
-              paddingLeft: sidebarOpen
-                ? "20px"
-                : "0",
-              textAlign: sidebarOpen
-                ? "left"
-                : "center",
+              paddingLeft: showLabels ? "20px" : "0",
+              textAlign: showLabels ? "left" : "center",
             }}
           >
-            {sidebarOpen ? "OVERVIEW" : "•••"}
+            {showLabels ? "OVERVIEW" : "•••"}
           </div>
 
-
-          {/* =================================================
-              NAV ITEMS
-          ================================================= */}
+          {/* NAV ITEMS */}
 
           {navItems.map((item) => {
-
             const Icon = item.icon;
 
             return (
-
               <NavLink
                 key={item.path}
                 to={item.path}
                 end={item.path === "/receptionist"}
-                onClick={() => setSidebarOpen(false)}
+                title={!showLabels ? item.name : undefined}
                 style={({ isActive }) => ({
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: sidebarOpen
+                  justifyContent: showLabels
                     ? "flex-start"
                     : "center",
                   gap: "14px",
@@ -548,44 +531,49 @@ const ReceptionistLayout = () => {
                   marginBottom: "7px",
                   borderRadius: "10px",
                   textDecoration: "none",
-                  color: isActive
-                    ? "#fff"
-                    : "#c4d0e2",
+                  color: isActive ? "#fff" : "#c4d0e2",
                   background: isActive
                     ? "#2864e8"
                     : "transparent",
                   fontSize: "15px",
-                  fontWeight: isActive
-                    ? "600"
-                    : "500",
+                  fontWeight: isActive ? "600" : "500",
+                  flexShrink: 0,
                 })}
               >
+                <Icon size={21} style={{ flexShrink: 0 }} />
 
-                <Icon size={21} />
-
-                {sidebarOpen && item.name}
-
+                {showLabels && (
+                  <span
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                )}
               </NavLink>
-
             );
-
           })}
-
         </nav>
 
-
         {/* ==================================================
-            BOTTOM USER SECTION
+            LOGOUT (always pinned at the very bottom)
         ================================================== */}
 
         <div
           style={{
-            padding: "18px 16px 24px",
-            borderTop:
-              "1px solid rgba(255,255,255,0.08)",
+            padding: "16px 14px",
+
+            // keeps the button clear of the phone's home bar
+            paddingBottom: "max(20px, env(safe-area-inset-bottom))",
+
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            flexShrink: 0,
+            background: "#0d172c",
           }}
         >
-
           <button
             type="button"
             onClick={handleLogout}
@@ -599,25 +587,25 @@ const ReceptionistLayout = () => {
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: sidebarOpen
-                ? "flex-start"
-                : "center",
+              justifyContent: showLabels ? "flex-start" : "center",
               gap: "12px",
               fontSize: "15px",
               fontWeight: "500",
+              transition: "background 0.2s ease",
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.background = "#263750";
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.background = "#1d2a40";
             }}
           >
-
             <LogOut size={20} />
 
-            {sidebarOpen && "Logout"}
-
+            {showLabels && "Logout"}
           </button>
-
         </div>
-
       </aside>
-
 
       {/* ====================================================
           MAIN CONTENT
@@ -625,62 +613,70 @@ const ReceptionistLayout = () => {
 
       <main
         style={{
-          marginLeft: sidebarOpen
-            ? "270px"
-            : "80px",
-          width: "100%",
+          marginLeft: `${mainMarginLeft}px`,
+
+          // minWidth: 0 stops wide pages from pushing the
+          // layout sideways on small screens.
+          flex: 1,
+          minWidth: 0,
+
           minHeight: "100vh",
           transition: "margin-left 0.2s ease",
         }}
       >
-
-
         {/* ==================================================
-            TOP HEADER
+            STICKY HEADER
+            Menu (3-line) button is the first item.
         ================================================== */}
 
         <header
           style={{
-            height: "82px",
+            position: "sticky",
+            top: 0,
+            zIndex: 900,
+
+            height: isMobile ? "68px" : "82px",
+
             background: "#fff",
             borderBottom: "1px solid #e8edf3",
+
             display: "flex",
             alignItems: "center",
-            padding: "0 30px",
+
+            padding: isMobile ? "0 14px" : "0 30px",
             boxSizing: "border-box",
-            gap: "18px",
+
+            gap: isMobile ? "12px" : "18px",
           }}
         >
-
           <button
             type="button"
-            onClick={() =>
-              setSidebarOpen(
-                (previous) => !previous
-              )
-            }
+            onClick={() => setSidebarOpen((previous) => !previous)}
+            aria-label="Toggle menu"
             style={{
               border: "none",
               background: "transparent",
               cursor: "pointer",
               padding: "8px",
+              flexShrink: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Menu size={23} color="#596b84" />
+            <Menu size={isMobile ? 26 : 23} color="#596b84" />
           </button>
 
-
-          <div>
-
+          <div style={{ minWidth: 0 }}>
             <h2
               style={{
                 margin: 0,
                 color: "#07152f",
-                fontSize: "30px",
+                fontSize: isMobile ? "18px" : "30px",
                 fontWeight: "600",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               Receptionist Dashboard
@@ -688,25 +684,22 @@ const ReceptionistLayout = () => {
 
             <p
               style={{
-                margin: "5px 0 0",
+                margin: "4px 0 0",
                 color: "#71849e",
-                fontSize: "14px",
+                fontSize: isMobile ? "12px" : "14px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               Manage players, fees & daily operations
             </p>
-
           </div>
 
-
-          <div
-            style={{
-              marginLeft: "auto",
-            }}
-          >
-
+          <div style={{ marginLeft: "auto", flexShrink: 0 }}>
             <button
               type="button"
+              aria-label="Notifications"
               style={{
                 border: "none",
                 background: "transparent",
@@ -717,16 +710,10 @@ const ReceptionistLayout = () => {
                 justifyContent: "center",
               }}
             >
-              <Bell
-                size={21}
-                color="#596b84"
-              />
+              <Bell size={21} color="#596b84" />
             </button>
-
           </div>
-
         </header>
-
 
         {/* ==================================================
             PAGE CONTENT
@@ -734,40 +721,15 @@ const ReceptionistLayout = () => {
 
         <div
           style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "24px 30px",
+            padding: isMobile ? "16px 14px" : "24px 30px",
             boxSizing: "border-box",
           }}
         >
-
           <Outlet />
-
         </div>
-
       </main>
-
-
-      {/* ====================================================
-          MOBILE OVERLAY
-      ==================================================== */}
-
-      {sidebarOpen && (
-
-        <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-          onClick={() =>
-            setSidebarOpen(false)
-          }
-        />
-
-      )}
-
     </div>
-
   );
-
 };
-
 
 export default ReceptionistLayout;

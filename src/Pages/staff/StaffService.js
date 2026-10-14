@@ -60,7 +60,7 @@ export const updateStaffStatus = async (id, status) => {
 
 export const deactivateStaff = async (id) => {
   try {
-    const response = await api.delete(`/staff/${id}`);
+    const response = await api.patch(`/staff/${id}`);
     return response.data;
   } catch (error) {
     if (error.response) throw error.response.data;
@@ -116,5 +116,23 @@ export const downloadStaffDocument = async (
     }
 
     throw new Error("Unable to connect to the server.");
+  }
+};
+
+
+
+
+
+
+export const deleteStaff = async (id) => {
+  try {
+    const response = await api.delete(`/staff/${id}`);
+    return response.data;
+  } catch (error) {
+    if (error.response) throw error.response.data;
+    throw {
+      success: false,
+      message: "Unable to connect to the server.",
+    };
   }
 };

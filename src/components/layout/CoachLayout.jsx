@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  LayoutDashboard,
-  CalendarCheck2,
   ClipboardCheck,
   History,
   Calendar,
   LogOut,
   Menu,
-  X,
   Clock,
 } from "lucide-react";
 import {
@@ -19,14 +16,20 @@ import {
 import CoachAttendanceService from "../../Pages/coach/CoachAttendanceService.js";
 
 
+const MOBILE_BREAKPOINT = 768;
+
 const CoachLayout = () => {
 
   // ==========================================================
   // STATES
   // ==========================================================
 
+  const [isMobile, setIsMobile] =
+    useState(window.innerWidth <= MOBILE_BREAKPOINT);
+
+  // Mobile -> closed by default | Desktop -> open by default
   const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+    useState(window.innerWidth > MOBILE_BREAKPOINT);
 
   const [todayAttendance, setTodayAttendance] =
     useState(null);
@@ -35,6 +38,58 @@ const CoachLayout = () => {
     useState(true);
 
   const navigate = useNavigate();
+
+
+  // ==========================================================
+  // RESPONSIVE HANDLING
+  // ==========================================================
+
+  useEffect(() => {
+
+    const handleResize = () => {
+
+      const mobile =
+        window.innerWidth <= MOBILE_BREAKPOINT;
+
+      setIsMobile((previous) => {
+
+        if (previous !== mobile) {
+          setSidebarOpen(!mobile);
+        }
+
+        return mobile;
+
+      });
+
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+
+  }, []);
+
+
+  // Lock page scroll behind the sidebar on mobile
+  useEffect(() => {
+
+    if (isMobile && sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+
+  }, [isMobile, sidebarOpen]);
+
+
+  // On mobile the sidebar always shows full labels when open
+  const showLabels = isMobile ? true : sidebarOpen;
 
 
   // ==========================================================
@@ -185,10 +240,7 @@ const CoachLayout = () => {
       let response;
 
 
-      // ======================================================
       // PUNCH OUT
-      // ======================================================
-
       if (
         todayAttendance?.punchInTime &&
         !todayAttendance?.punchOutTime
@@ -199,11 +251,7 @@ const CoachLayout = () => {
 
       }
 
-
-      // ======================================================
       // PUNCH IN
-      // ======================================================
-
       else if (!todayAttendance) {
 
         response =
@@ -211,11 +259,7 @@ const CoachLayout = () => {
 
       }
 
-
-      // ======================================================
       // ALREADY COMPLETED
-      // ======================================================
-
       else {
 
         return;
@@ -223,10 +267,7 @@ const CoachLayout = () => {
       }
 
 
-      // ======================================================
       // UPDATE SIDEBAR STATE IMMEDIATELY
-      // ======================================================
-
       if (response?.data) {
 
         setTodayAttendance(response.data);
@@ -238,10 +279,7 @@ const CoachLayout = () => {
       }
 
 
-      // ======================================================
       // UPDATE ATTENDANCE PAGE
-      // ======================================================
-
       window.dispatchEvent(
         new Event("attendanceUpdated")
       );
@@ -255,10 +293,7 @@ const CoachLayout = () => {
       );
 
 
-      // ======================================================
       // ACADEMY WI-FI / NETWORK ERROR
-      // ======================================================
-
       if (
         error?.code === "ERR_NETWORK" ||
         error?.code === "ECONNABORTED" ||
@@ -283,10 +318,7 @@ const CoachLayout = () => {
       }
 
 
-      // ======================================================
       // REFRESH STATE AFTER ERROR
-      // ======================================================
-
       await loadTodayAttendance();
 
     } finally {
@@ -310,19 +342,9 @@ const CoachLayout = () => {
       return true;
     }
 
-
-    // --------------------------------------------------------
-    // No attendance yet
-    // --------------------------------------------------------
-
     if (!todayAttendance) {
       return true;
     }
-
-
-    // --------------------------------------------------------
-    // Show only when punched in but not punched out
-    // --------------------------------------------------------
 
     return !!(
       todayAttendance.punchInTime &&
@@ -382,15 +404,9 @@ const CoachLayout = () => {
 
   // ==========================================================
   // NAVIGATION
-  // Same visual structure as Admin Layout
   // ==========================================================
 
   const navigationItems = [
-
-    
-
-    
-
 
     {
       name: "Player Attendance Management",
@@ -398,51 +414,61 @@ const CoachLayout = () => {
       icon: ClipboardCheck,
     },
 
-
     {
       name: "Player Attendance Records",
       path: "/coach/Playee-attendance-history",
       icon: History,
     },
 
-
+    {
+      name: "Leave",
+      path: "/coach/leave-requests",
+      icon: Calendar,
+    },
 
     {
-  name: "Leave",
-  path: "/coach/leave-requests",
-  icon: Calendar,
-},
+      name: "Player Injury Email",
+      path: "/coach/player-mails",
+      icon: Calendar,
+    },
 
+    {
+      name: "History Batches",
+      path: "/coach/history-batches",
+      icon: Calendar,
+    },
 
-
-{
-  name: "Player Injury Email",
-path:"/coach/player-mails",
-  icon:Calendar,
-
-},
-
-
-
-{
-  name:"History Batches",
-
-  path:"/coach/history-batches",
-  icon:Calendar,
-
-},
-
-
-
-{
-  name:"Performace Cards",
-  path:"/coach/performance-card",
-  icon:Calendar,
-
-}
-
+    {
+      name: "Performace Cards",
+      path: "/coach/performance-card",
+      icon: Calendar,
+    },
 
   ];
+
+
+  // ==========================================================
+  // SIDEBAR STYLE (desktop + mobile)
+  // ==========================================================
+
+  const sidebarStyle = isMobile
+    ? {
+        width: "270px",
+        maxWidth: "82vw",
+        transform: sidebarOpen
+          ? "translateX(0)"
+          : "translateX(-100%)",
+        transition: "transform 0.25s ease",
+        boxShadow: sidebarOpen
+          ? "4px 0 24px rgba(0,0,0,0.35)"
+          : "none",
+        zIndex: 2000,
+      }
+    : {
+        width: sidebarOpen ? "270px" : "80px",
+        transition: "width 0.2s ease",
+        zIndex: 1000,
+      };
 
 
   // ==========================================================
@@ -460,29 +486,45 @@ path:"/coach/player-mails",
     >
 
       {/* =====================================================
-          SIDEBAR
+          MOBILE BACKDROP
+      ====================================================== */}
+
+      {isMobile && sidebarOpen && (
+
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(7, 21, 47, 0.55)",
+            zIndex: 1500,
+          }}
+        />
+
+      )}
+
+
+      {/* =====================================================
+          SIDEBAR (fixed / sticky - does not scroll with page)
       ====================================================== */}
 
       <aside
         style={{
-          width: sidebarOpen ? "270px" : "80px",
+          ...sidebarStyle,
           background: "#0d172c",
           color: "#fff",
-          minHeight: "100vh",
-          transition: "width 0.2s ease",
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           position: "fixed",
           left: 0,
           top: 0,
           bottom: 0,
-          zIndex: 1000,
+          overflow: "hidden",
         }}
       >
 
-        {/* ==================================================
-            LOGO
-        =================================================== */}
+        {/* LOGO */}
 
         <div
           style={{
@@ -491,6 +533,7 @@ path:"/coach/player-mails",
             alignItems: "center",
             gap: "14px",
             borderBottom: "1px solid rgba(255,255,255,0.08)",
+            flexShrink: 0,
           }}
         >
 
@@ -512,7 +555,7 @@ path:"/coach/player-mails",
           </div>
 
 
-          {sidebarOpen && (
+          {showLabels && (
 
             <div>
 
@@ -542,22 +585,15 @@ path:"/coach/player-mails",
         </div>
 
 
-        {/* ==================================================
-            ATTENDANCE BUTTON
+        {/* ATTENDANCE BUTTON */}
 
-            Punch In
-                ↓
-            Punch Out
-                ↓
-            Hidden
-        =================================================== */}
-
-        {sidebarOpen &&
+        {showLabels &&
           shouldShowAttendanceButton() && (
 
           <div
             style={{
               padding: "18px 16px 0",
+              flexShrink: 0,
             }}
           >
 
@@ -598,14 +634,13 @@ path:"/coach/player-mails",
         )}
 
 
-        {/* ==================================================
-            SIDEBAR MENU
-        =================================================== */}
+        {/* SIDEBAR MENU */}
 
         <nav
           style={{
             padding: "24px 16px",
             flex: 1,
+            overflowY: "auto", // only scrolls if the phone screen is very short
           }}
         >
 
@@ -614,16 +649,16 @@ path:"/coach/player-mails",
               color: "#7184a3",
               fontSize: "12px",
               marginBottom: "14px",
-              paddingLeft: sidebarOpen
+              paddingLeft: showLabels
                 ? "20px"
                 : "0",
-              textAlign: sidebarOpen
+              textAlign: showLabels
                 ? "left"
                 : "center",
             }}
           >
 
-            {sidebarOpen ? "OVERVIEW" : "•••"}
+            {showLabels ? "OVERVIEW" : "•••"}
 
           </div>
 
@@ -638,10 +673,15 @@ path:"/coach/player-mails",
                 key={item.path}
                 to={item.path}
                 end={item.path === "/coach"}
+                onClick={() => {
+                  if (isMobile) {
+                    setSidebarOpen(false);
+                  }
+                }}
                 style={({ isActive }) => ({
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: sidebarOpen
+                  justifyContent: showLabels
                     ? "flex-start"
                     : "center",
                   gap: "14px",
@@ -662,9 +702,9 @@ path:"/coach/player-mails",
                 })}
               >
 
-                <Icon size={21} />
+                <Icon size={21} style={{ flexShrink: 0 }} />
 
-                {sidebarOpen && item.name}
+                {showLabels && item.name}
 
               </NavLink>
 
@@ -675,15 +715,14 @@ path:"/coach/player-mails",
         </nav>
 
 
-        {/* ==================================================
-            LOGOUT
-        =================================================== */}
+        {/* LOGOUT */}
 
         <div
           style={{
             padding: "18px 16px 24px",
             borderTop:
               "1px solid rgba(255,255,255,0.08)",
+            flexShrink: 0,
           }}
         >
 
@@ -700,7 +739,7 @@ path:"/coach/player-mails",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: sidebarOpen
+              justifyContent: showLabels
                 ? "flex-start"
                 : "center",
               gap: "12px",
@@ -711,7 +750,7 @@ path:"/coach/player-mails",
 
             <LogOut size={20} />
 
-            {sidebarOpen && "Logout"}
+            {showLabels && "Logout"}
 
           </button>
 
@@ -726,34 +765,41 @@ path:"/coach/player-mails",
 
       <main
         style={{
-          marginLeft: sidebarOpen
-            ? "270px"
-            : "80px",
+          marginLeft: isMobile
+            ? "0"
+            : sidebarOpen
+              ? "270px"
+              : "80px",
+          flex: 1,
           width: "100%",
+          minWidth: 0,
           minHeight: "100vh",
           transition: "margin-left 0.2s ease",
         }}
       >
 
-        {/* ==================================================
-            HEADER
-        =================================================== */}
+        {/* HEADER */}
 
         <header
           style={{
-            height: "82px",
+            minHeight: isMobile ? "auto" : "82px",
             background: "#fff",
             borderBottom: "1px solid #e8edf3",
             display: "flex",
             alignItems: "center",
-            padding: "0 30px",
+            padding: isMobile
+              ? "16px 16px 18px"
+              : "0 30px",
             boxSizing: "border-box",
-            gap: "18px",
+            gap: isMobile ? "12px" : "18px",
           }}
         >
 
+          {/* THREE LINE BUTTON (top-left) */}
+
           <button
             type="button"
+            aria-label="Toggle sidebar"
             onClick={() =>
               setSidebarOpen(
                 (previous) => !previous
@@ -767,36 +813,28 @@ path:"/coach/player-mails",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
 
-            {sidebarOpen ? (
-
-              <X
-                size={23}
-                color="#596b84"
-              />
-
-            ) : (
-
-              <Menu
-                size={23}
-                color="#596b84"
-              />
-
-            )}
+            <Menu
+              size={26}
+              color="#596b84"
+            />
 
           </button>
 
 
-          <div>
+          <div style={{ minWidth: 0 }}>
 
             <h2
               style={{
                 margin: 0,
                 color: "#07152f",
-                fontSize: "30px",
+                fontSize: isMobile ? "22px" : "30px",
                 fontWeight: "600",
+                lineHeight: 1.25,
+                wordBreak: "break-word",
               }}
             >
               Welcome, {username || "Coach"}
@@ -804,9 +842,10 @@ path:"/coach/player-mails",
 
             <p
               style={{
-                margin: "5px 0 0",
+                margin: isMobile ? "8px 0 0" : "5px 0 0",
                 color: "#71849e",
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px",
+                lineHeight: 1.4,
               }}
             >
               Manage your coaching and daily operations
@@ -817,9 +856,7 @@ path:"/coach/player-mails",
         </header>
 
 
-        {/* ==================================================
-            PAGE CONTENT
-        =================================================== */}
+        {/* PAGE CONTENT */}
 
         <Outlet />
 

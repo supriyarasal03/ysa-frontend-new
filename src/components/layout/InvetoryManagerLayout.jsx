@@ -85,7 +85,7 @@ const InventoryManagerLayout = () => {
 
       } catch (error) {
 
-  
+
 
       }
 
@@ -389,8 +389,6 @@ const InventoryManagerLayout = () => {
 
   const navItems = [
 
- 
-
     {
       name: "Inventory Management",
       path: "/inventory",
@@ -405,38 +403,24 @@ const InventoryManagerLayout = () => {
       end: false,
     },
 
-
-
     {
-
-      name:"Innventory Report",
-      path:"/innventoty/innventory-stock",
-     icon: History,
+      name: "Innventory Report",
+      path: "/innventoty/innventory-stock",
+      icon: History,
       end: false,
-
-
     },
 
-   
-    
     {
-  name: "Leave",
-  path: "/inventoty/leave",
-  icon: Calendar,
-},
-
-
+      name: "Leave",
+      path: "/inventoty/leave",
+      icon: Calendar,
+    },
 
     {
-  name: "Player Innventory Purcahse",
-  path: "innventory/player-inventoty-purcahse",
-  icon: Calendar,
-}
-
-
-
-
-
+      name: "Player Innventory Purcahse",
+      path: "innventory/player-inventoty-purcahse",
+      icon: Calendar,
+    },
 
   ];
 
@@ -469,11 +453,13 @@ const InventoryManagerLayout = () => {
 
       {/* =====================================================
           SIDEBAR
+          Mobile  : hidden, slides in when menu button clicked
+          Desktop : always visible, fixed (does not scroll)
       ===================================================== */}
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-72
+          fixed inset-y-0 left-0 z-50 flex w-72 flex-col
           bg-[#0f172a] text-white
           transform transition-transform duration-300 ease-in-out
           ${
@@ -490,23 +476,23 @@ const InventoryManagerLayout = () => {
             BRAND
         =================================================== */}
 
-        <div className="flex items-center justify-between border-b border-slate-700/50 px-6 py-5">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-700/50 px-6 py-5">
 
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold shadow-md">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold shadow-md">
 
               Y
 
             </div>
 
-            <div>
+            <div className="min-w-0">
 
               <h1 className="text-base font-semibold tracking-wide">
                 Yashree Sports
               </h1>
 
-              <p className="text-xs text-slate-400">
+              <p className="truncate text-xs text-slate-400">
                 {displayName}
               </p>
 
@@ -536,7 +522,7 @@ const InventoryManagerLayout = () => {
 
         {!attendanceCompleted && (
 
-          <div className="border-b border-slate-700/50 px-4 py-4">
+          <div className="shrink-0 border-b border-slate-700/50 px-4 py-4">
 
             <button
               type="button"
@@ -575,9 +561,10 @@ const InventoryManagerLayout = () => {
 
         {/* ===================================================
             NAVIGATION
+            (scrolls inside the sidebar only on very short screens)
         =================================================== */}
 
-        <nav className="space-y-1 px-3 py-6">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
 
           <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
 
@@ -630,10 +617,10 @@ const InventoryManagerLayout = () => {
 
 
         {/* ===================================================
-            BOTTOM USER SECTION
+            BOTTOM USER SECTION (pinned to bottom)
         =================================================== */}
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700/50 p-4">
+        <div className="shrink-0 border-t border-slate-700/50 p-4">
 
           <div className="mb-3 flex items-center gap-3">
 
@@ -703,32 +690,35 @@ const InventoryManagerLayout = () => {
             TOP HEADER
         =================================================== */}
 
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
 
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+
+            {/* THREE LINE BUTTON - top left on mobile */}
 
             <button
               type="button"
+              aria-label="Open sidebar"
               onClick={() =>
                 setSidebarOpen(true)
               }
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+              className="shrink-0 rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
             >
 
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
 
             </button>
 
 
-            <div>
+            <div className="min-w-0">
 
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="break-words text-lg font-semibold leading-snug text-gray-900 sm:text-2xl">
 
                 Inventory Manager Dashboard
 
               </h2>
 
-              <p className="text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500">
 
                 Manage academy inventory
 
@@ -741,7 +731,7 @@ const InventoryManagerLayout = () => {
 
           {/* Notification */}
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
 
             <button
               type="button"

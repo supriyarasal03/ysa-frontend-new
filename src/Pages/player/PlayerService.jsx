@@ -15,6 +15,18 @@ const PlayerService = {
   // ========================================================= 
   // GET PLAYER BY ID 
   // ========================================================= 
+
+
+  // Permanently delete a player
+  deletePermanently: async (id) => {
+    const response = await axiosClient.delete(
+      `/player/${id}/permanent`
+    );
+    return response.data;
+  },
+
+
+
  
   getById: async (id) => { 
     const res = await axiosClient.get(`/player/${id}`); 

@@ -607,3 +607,30 @@ export const markInjuryReportAsRead = async (id) => {
     throw err;
   }
 };
+
+
+
+
+
+
+ // =========================================================
+ // DELETE COACH
+ // =========================================================
+
+export const deleteCoach = async (id) => {
+  try {
+    const res = await api.delete(`/coach/${id}`);
+    return res.data;
+  } catch (error) {
+    const backend = error.response?.data;
+
+    const err = new Error(
+      backend?.message || "Failed to delete coach"
+    );
+
+    err.data = backend?.data ?? null;
+    err.response = error.response;
+
+    throw err;
+  }
+};

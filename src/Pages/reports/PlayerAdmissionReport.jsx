@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 
+
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+
 import {
   Box,
   Card,
@@ -43,7 +47,7 @@ import {
   downloadPlayerAdmissionReportPdf,
 } from "./report";
 
-import { getSports } from "../batch/batchService";
+import { getSports } from "../batch/BatchService";
 
 
 // ============================================================
@@ -84,6 +88,9 @@ const PlayerAdmissionReport = () => {
   // ==========================================================
   // FILTER STATES
   // ==========================================================
+
+
+  const navigate = useNavigate();
 
   const [period, setPeriod] = useState("DAILY");
 
@@ -320,6 +327,26 @@ const loadSports = async () => {
 
         <Box>
 
+
+
+<Button
+  variant="outlined"
+  startIcon={<ArrowLeft size={18} />}
+  onClick={() => navigate("/admin/reports")}
+  sx={{
+    mb: 2,
+    textTransform: "none",
+    fontWeight: 600,
+    borderRadius: "10px",
+  }}
+>
+  Back to Reports
+</Button>
+
+
+
+
+
           <Typography
             sx={{
               fontSize: {
@@ -432,7 +459,7 @@ const loadSports = async () => {
 
           <Grid
   container
-  spacing={2}
+  spacing={2}   
   sx={{
     alignItems: "center",
   }}

@@ -6,6 +6,7 @@ import {
   Plus,
   Eye,
   Edit2,
+    Trash2,
   Download,
   Users,
   UserCheck,
@@ -29,6 +30,9 @@ const PlayerManagement = () => {
   // =========================================================
 
   const [playerPhotoUrl, setPlayerPhotoUrl] = useState(null);
+
+
+  const [deletingPlayerId, setDeletingPlayerId] = useState(null);
 
   // =========================================================
   // DOCUMENT LOADING
@@ -461,6 +465,61 @@ const PlayerManagement = () => {
   };
 
 
+
+  
+
+
+
+
+  
+const handlePermanentDelete = async (player) => {
+  const playerName =
+    `${player.firstName || ""} ${player.lastName || ""}`.trim();
+
+  const confirmed = window.confirm(
+    `Permanently delete ${playerName || `Player #${player.id}`}?\n\n` +
+    "This action cannot be undone. The player's related records may also be deleted."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setDeletingPlayerId(player.id);
+
+    await PlayerService.deletePermanently(player.id);
+
+    // Close the details modal if this player is currently open.
+    if (selectedPlayer?.id === player.id) {
+      closePlayerView();
+    }
+
+    // Reload the player list and counts.
+    await fetchPlayers();
+
+    // Prevent pagination from remaining on an empty page.
+    setCurrentPage(1);
+
+    window.alert("Player permanently deleted successfully.");
+  } catch (error) {
+    console.error("Failed to permanently delete player:", error);
+
+    window.alert(
+      error?.response?.data?.message ||
+      "Unable to permanently delete the player. Please try again."
+    );
+  } finally {
+    setDeletingPlayerId(null);
+  }
+};
+
+
+
+
+
+
+
+
+
   // =========================================================
   // STATUS CHANGE
   // =========================================================
@@ -510,13 +569,13 @@ const PlayerManagement = () => {
           </p>
         </div>
 
-        <Link
-          to="/receptionist/player-form"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4" />
-          Add New Player
-        </Link>
+       <Link
+  to="/receptionist/player-form"
+  className="flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium no-underline rounded-lg hover:bg-blue-700"
+>
+  <Plus className="w-4 h-4" />
+  <span>Add New Player</span>
+</Link>
 
       </div>
 
@@ -870,6 +929,32 @@ const PlayerManagement = () => {
                             </option>
 
                           </select>
+
+
+
+
+
+
+<button
+  type="button"
+  onClick={() => handlePermanentDelete(player)}
+  disabled={deletingPlayerId === player.id}
+  className="p-1.5 rounded-lg hover:bg-red-50 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+  title="Delete Permanently"
+  aria-label={`Permanently delete ${player.firstName || "player"}`}
+>
+  {deletingPlayerId === player.id ? (
+    <span className="text-xs">Deleting...</span>
+  ) : (
+    <Trash2 className="w-4 h-4" />
+  )}
+</button>
+
+
+
+
+
+
 
                         </div>
 

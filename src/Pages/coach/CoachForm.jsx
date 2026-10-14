@@ -160,7 +160,7 @@ const [sportsLoading, setSportsLoading] = useState(false);
     mobileNumber: "",
     gender: "",
     dateOfBirth: "",
-   joiningDate: getTodayDate(),
+    joiningDate: "",
     address: "",  
 
     // Professional
@@ -1462,7 +1462,7 @@ const resetCoachForm = () => {
     mobileNumber: "",
     gender: "",
     dateOfBirth: "",
-   joiningDate: getTodayDate(),
+    joiningDate: "",
     address: "",
 
     experience: "",

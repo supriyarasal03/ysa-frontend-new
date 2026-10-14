@@ -24,14 +24,18 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+
 import {
   getAllStaff,
   downloadStaffDocument,
   updateStaffStatus,
   getStaffDocument,
   deactivateStaff,
+  deleteStaff,
   getStaffById,
 } from "./StaffService";
+
+
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -51,7 +55,13 @@ export default function StaffManagement() {
   const itemsPerPage = 8;
 
 
-const [photoUrls, setPhotoUrls] = useState({});
+
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [staffToDelete, setStaffToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+
+  const [photoUrls, setPhotoUrls] = useState({});
 
 
   const [sortField, setSortField] = useState("id");
@@ -85,10 +95,10 @@ const [photoUrls, setPhotoUrls] = useState({});
 
 
       // Latest staff record first
-list.sort((a, b) => (b.id || 0) - (a.id || 0));
+      list.sort((a, b) => (b.id || 0) - (a.id || 0));
 
-setStaffList(list);
-setCurrentPage(1);
+      setStaffList(list);
+      setCurrentPage(1);
 
 
 
@@ -149,47 +159,47 @@ setCurrentPage(1);
 
 
 
-useEffect(() => {
-  let createdUrls = [];
+  useEffect(() => {
+    let createdUrls = [];
 
-  const loadStaffPhotos = async () => {
-    if (!staffList || staffList.length === 0) {
-      return;
-    }
-
-    const urls = {};
-
-    for (const staff of staffList) {
-      if (!staff?.id || !staff?.photoUrl) {
-        continue;
+    const loadStaffPhotos = async () => {
+      if (!staffList || staffList.length === 0) {
+        return;
       }
 
-      try {
-        const blob = await getStaffDocument(staff.id, "photo");
+      const urls = {};
 
-        const url = URL.createObjectURL(blob);
+      for (const staff of staffList) {
+        if (!staff?.id || !staff?.photoUrl) {
+          continue;
+        }
 
-        urls[staff.id] = url;
-        createdUrls.push(url);
-      } catch (error) {
-        console.error(
-          `Unable to load photo for staff ${staff.id}:`,
-          error
-        );
+        try {
+          const blob = await getStaffDocument(staff.id, "photo");
+
+          const url = URL.createObjectURL(blob);
+
+          urls[staff.id] = url;
+          createdUrls.push(url);
+        } catch (error) {
+          console.error(
+            `Unable to load photo for staff ${staff.id}:`,
+            error
+          );
+        }
       }
-    }
 
-    setPhotoUrls(urls);
-  };
+      setPhotoUrls(urls);
+    };
 
-  loadStaffPhotos();
+    loadStaffPhotos();
 
-  return () => {
-    createdUrls.forEach((url) => {
-      URL.revokeObjectURL(url);
-    });
-  };
-}, [staffList]);
+    return () => {
+      createdUrls.forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, [staffList]);
 
 
 
@@ -304,130 +314,165 @@ useEffect(() => {
 
   // ---------- Delete ----------
 
+  const openDeleteConfirm = (staff) => {
+    setStaffToDelete(staff);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteStaff = async () => {
+    if (!staffToDelete || deleteLoading) return;
+
+    try {
+      setDeleteLoading(true);
+
+      await deleteStaff(staffToDelete.id);
+
+      setDeleteConfirmOpen(false);
+      setStaffToDelete(null);
+
+      if (viewStaff?.id === staffToDelete.id) {
+        setViewOpen(false);
+        setViewStaff(null);
+      }
+
+      await loadStaff();
+
+      alert("Staff member deleted successfully.");
+    } catch (error) {
+      console.error("Staff deletion failed:", error);
+
+      alert(
+        error?.message ||
+        "Failed to delete staff member. Please try again."
+      );
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
 
 
-const handleDocumentDownload = async (label, documentType) => {
-  if (!viewStaff?.id || !documentType) {
-    alert("Document information is not available.");
-    return;
-  }
-
-  try {
-    const blob = await downloadStaffDocument(
-      viewStaff.id,
-      documentType
-    );
-
-    if (!blob || !blob.size) {
-      alert("File is empty.");
+  const handleDocumentDownload = async (label, documentType) => {
+    if (!viewStaff?.id || !documentType) {
+      alert("Document information is not available.");
       return;
     }
 
-    const blobUrl = URL.createObjectURL(blob);
+    try {
+      const blob = await downloadStaffDocument(
+        viewStaff.id,
+        documentType
+      );
 
-    const extension =
-      blob.type === "application/pdf"
-        ? "pdf"
-        : blob.type.startsWith("image/")
-        ? "jpg"
-        : "file";
+      if (!blob || !blob.size) {
+        alert("File is empty.");
+        return;
+      }
 
-    const fileName =
-      `${getFullName(viewStaff)}-${label
-        .replace(/\s+/g, "-")
-        .toLowerCase()}.${extension}`;
+      const blobUrl = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+      const extension =
+        blob.type === "application/pdf"
+          ? "pdf"
+          : blob.type.startsWith("image/")
+          ? "jpg"
+          : "file";
 
-    link.href = blobUrl;
-    link.download = fileName;
+      const fileName =
+        `${getFullName(viewStaff)}-${label
+          .replace(/\s+/g, "-")
+          .toLowerCase()}.${extension}`;
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      const link = document.createElement("a");
 
-    URL.revokeObjectURL(blobUrl);
+      link.href = blobUrl;
+      link.download = fileName;
 
-  } catch (error) {
-    console.error("Download failed:", error);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-    if (error?.response?.status === 401) {
-      alert("Session expired. Please login again.");
-    } else {
-      alert("Unable to download document.");
+      URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+      console.error("Download failed:", error);
+
+      if (error?.response?.status === 401) {
+        alert("Session expired. Please login again.");
+      } else {
+        alert("Unable to download document.");
+      }
     }
-  }
-};
+  };
 
 
 
 
 
-const openDocumentPreview = async (label, documentType) => {
-  if (!viewStaff?.id || !documentType) {
-    alert("Document information is not available.");
-    return;
-  }
-
-  try {
-    console.log(
-      `Loading ${documentType} for staff ${viewStaff.id}`
-    );
-
-    const blob = await getStaffDocument(
-      viewStaff.id,
-      documentType
-    );
-
-    console.log(
-      "Document type:",
-      blob.type,
-      "size:",
-      blob.size
-    );
-
-    if (!blob || !blob.size) {
-      alert("File is empty.");
+  const openDocumentPreview = async (label, documentType) => {
+    if (!viewStaff?.id || !documentType) {
+      alert("Document information is not available.");
       return;
     }
 
-    const blobUrl = URL.createObjectURL(blob);
+    try {
+      console.log(
+        `Loading ${documentType} for staff ${viewStaff.id}`
+      );
 
-    const type = (blob.type || "").toLowerCase();
+      const blob = await getStaffDocument(
+        viewStaff.id,
+        documentType
+      );
 
-    const isImage = type.startsWith("image/");
-    const isPdf =
-      type === "application/pdf" ||
-      type.includes("pdf");
+      console.log(
+        "Document type:",
+        blob.type,
+        "size:",
+        blob.size
+      );
 
-    setPreviewDoc({
-      label,
-      documentType,
-      url: blobUrl,
-      blob,
-      isBlob: true,
-      isImage,
-      isPdf,
-    });
+      if (!blob || !blob.size) {
+        alert("File is empty.");
+        return;
+      }
 
-  } catch (error) {
-    console.error(
-      "Unable to preview document:",
-      error
-    );
+      const blobUrl = URL.createObjectURL(blob);
 
-    const status = error?.response?.status;
+      const type = (blob.type || "").toLowerCase();
 
-    if (status === 401) {
-      alert("Session expired. Please login again.");
-    } else if (status === 404) {
-      alert("Document not found.");
-    } else {
-      alert("Unable to open document.");
+      const isImage = type.startsWith("image/");
+      const isPdf =
+        type === "application/pdf" ||
+        type.includes("pdf");
+
+      setPreviewDoc({
+        label,
+        documentType,
+        url: blobUrl,
+        blob,
+        isBlob: true,
+        isImage,
+        isPdf,
+      });
+
+    } catch (error) {
+      console.error(
+        "Unable to preview document:",
+        error
+      );
+
+      const status = error?.response?.status;
+
+      if (status === 401) {
+        alert("Session expired. Please login again.");
+      } else if (status === 404) {
+        alert("Document not found.");
+      } else {
+        alert("Unable to open document.");
+      }
     }
-  }
-};
+  };
 
 
   // ---------- View Detail ----------
@@ -447,29 +492,33 @@ const openDocumentPreview = async (label, documentType) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] p-6 lg:p-8">
+    <div className="min-h-screen bg-[#f1f5f9] px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Staff Management</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 sm:mb-8">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
+            Staff Management
+          </h1>
           <p className="text-slate-500 text-sm mt-1">
             Manage all staff members of Yashree Sports Academy
           </p>
         </div>
 
         <button
+          type="button"
           onClick={() => navigate("/staff-form")}
-          className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition shadow-md hover:shadow-lg"
+          className="inline-flex items-center justify-center gap-2 self-start md:self-auto bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white px-5 py-3 rounded-xl font-semibold text-sm whitespace-nowrap transition shadow-md hover:shadow-lg"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           Add New Staff
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-6 sm:mb-8">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0">
             <Users className="w-6 h-6 text-sky-600" />
           </div>
           <div>
@@ -478,8 +527,8 @@ const openDocumentPreview = async (label, documentType) => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
             <UserCheck className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
@@ -488,8 +537,8 @@ const openDocumentPreview = async (label, documentType) => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
             <UserX className="w-6 h-6 text-rose-600" />
           </div>
           <div>
@@ -507,8 +556,9 @@ const openDocumentPreview = async (label, documentType) => {
 
       {/* Table Card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
         {/* Toolbar */}
-        <div className="p-5 border-b border-slate-100 flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
           <div className="relative w-full lg:w-72">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -520,14 +570,14 @@ const openDocumentPreview = async (label, documentType) => {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-slate-400" />
-              <span className="text-sm text-slate-500">Status</span>
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="text-sm text-slate-500 w-12 sm:w-auto shrink-0">Status</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/40 cursor-pointer min-w-[130px]"
+                className="flex-1 sm:flex-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/40 cursor-pointer sm:min-w-[130px]"
               >
                 <option value="All">All Status</option>
                 <option value="Active">Active</option>
@@ -535,12 +585,13 @@ const openDocumentPreview = async (label, documentType) => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">Role</span>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="w-4 shrink-0 sm:hidden" />
+              <span className="text-sm text-slate-500 w-12 sm:w-auto shrink-0">Role</span>
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/40 cursor-pointer min-w-[160px]"
+                className="flex-1 sm:flex-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/40 cursor-pointer sm:min-w-[160px]"
               >
                 <option value="All">All Roles</option>
                 <option value="RECEPTIONIST">Receptionist</option>
@@ -551,45 +602,45 @@ const openDocumentPreview = async (label, documentType) => {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table (scrolls sideways inside the card on small screens) */}
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="bg-slate-50 text-left">
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Avatar
                 </th>
                 <th
-                  className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
+                  className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
                   onClick={() => toggleSort("name")}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
                     Staff Member <SortIcon field="name" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Contact
                 </th>
                 <th
-                  className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
+                  className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
                   onClick={() => toggleSort("role")}
                 >
                   <div className="flex items-center gap-1.5">
                     Role <SortIcon field="role" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th
-                  className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
+                  className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700"
                   onClick={() => toggleSort("joiningDate")}
                 >
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
                     Joined Date <SortIcon field="joiningDate" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
+                <th className="px-4 sm:px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">
                   Actions
                 </th>
               </tr>
@@ -613,12 +664,12 @@ const openDocumentPreview = async (label, documentType) => {
                     .toUpperCase();
 
 
-             const photoUrl = photoUrls[staff.id];
+                  const photoUrl = photoUrls[staff.id];
 
                   return (
                     <tr key={staff.id} className="hover:bg-slate-50/70 transition">
                       {/* Avatar */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4">
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
                           {photoUrl ? (
                             <img
@@ -644,13 +695,12 @@ const openDocumentPreview = async (label, documentType) => {
                       </td>
 
                       {/* Name */}
-                      <td className="px-6 py-4">
-                        <p className="font-medium text-slate-800">{name}</p>
-                        
+                      <td className="px-4 sm:px-6 py-4">
+                        <p className="font-medium text-slate-800 whitespace-nowrap">{name}</p>
                       </td>
 
                       {/* Contact */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4">
                         <p className="text-sm text-slate-700">
                           {staff.email || "-"}
                         </p>
@@ -660,14 +710,14 @@ const openDocumentPreview = async (label, documentType) => {
                       </td>
 
                       {/* Role */}
-                      <td className="px-6 py-4">
-                        <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700">
+                      <td className="px-4 sm:px-6 py-4">
+                        <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">
                           {formatRole(staff.role)}
                         </span>
                       </td>
 
                       {/* Status */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                             isActive(status)
@@ -687,15 +737,12 @@ const openDocumentPreview = async (label, documentType) => {
                       </td>
 
                       {/* Joined */}
-                      <td className="px-6 py-4 text-sm text-slate-500">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-slate-500 whitespace-nowrap">
                         {formatDate(staff.joiningDate || staff.joined)}
                       </td>
 
-
-
-
                       {/* Actions */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => openView(staff)}
@@ -704,9 +751,6 @@ const openDocumentPreview = async (label, documentType) => {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-
-
-
 
                           <button
                             onClick={() => navigate(`/staff-form/${staff.id}`)}
@@ -735,7 +779,14 @@ const openDocumentPreview = async (label, documentType) => {
                             <Power className="w-4 h-4" />
                           </button>
 
-                        
+                          <button
+                            type="button"
+                            onClick={() => openDeleteConfirm(staff)}
+                            className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                            title="Permanently delete staff"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -757,8 +808,8 @@ const openDocumentPreview = async (label, documentType) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">
+        <div className="px-4 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-slate-500 text-center sm:text-left">
             Showing{" "}
             <span className="font-semibold text-slate-800">
               {sortedStaff.length === 0 ? 0 : startIndex + 1}
@@ -774,7 +825,7 @@ const openDocumentPreview = async (label, documentType) => {
             staff
           </p>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
@@ -814,9 +865,9 @@ const openDocumentPreview = async (label, documentType) => {
 
       {/* ========== VIEW DETAIL MODAL ========== */}
       {viewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-slate-900 text-white px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
+            <div className="sticky top-0 bg-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <h2 className="text-lg font-semibold">Staff Details</h2>
               <button
                 onClick={() => setViewOpen(false)}
@@ -831,55 +882,40 @@ const openDocumentPreview = async (label, documentType) => {
                 Loading details...
               </div>
             ) : viewStaff ? (
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
                 {/* Photo + basic */}
-               
-               
-                <div className="flex flex-col sm:flex-row gap-5 items-start">
-
-
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
 
                   <div
-  className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shrink-0 cursor-pointer group"
-  onClick={() => {
+                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shrink-0 cursor-pointer group"
+                    onClick={() => {
+                      if (photoUrls[viewStaff.id]) {
+                        setPhotoPreviewOpen(true);
+                      }
+                    }}
+                    title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
+                  >
+                    {photoUrls[viewStaff.id] ? (
+                      <img
+                        src={photoUrls[viewStaff.id]}
+                        alt={getFullName(viewStaff)}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    ) : (
+                      getFullName(viewStaff)
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    )}
+                  </div>
 
-
-   if (photoUrls[viewStaff.id]) {
-
-
-
-      setPhotoPreviewOpen(true);
-    }
-  }}
-
-
-title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
-
-
->
- {photoUrls[viewStaff.id] ? (
-    <img
-    src={photoUrls[viewStaff.id]}
-
-      alt={getFullName(viewStaff)}
-      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-    />
-  ) : (
-    getFullName(viewStaff)
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase()
-  )}
-</div>
-
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-800">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-800 break-words">
                       {getFullName(viewStaff)}
                     </h3>
 
-                   
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -900,7 +936,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                 </div>
 
                 {/* Personal */}
-                <div className="border border-slate-200 rounded-xl p-5">
+                <div className="border border-slate-200 rounded-xl p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <User className="w-4 h-4 text-sky-600" />
                     <h4 className="text-sm font-semibold text-slate-700 uppercase">
@@ -908,17 +944,17 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                     </h4>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-start gap-2">
-                      <Mail className="w-4 h-4 text-slate-400 mt-0.5" />
-                      <div>
+                    <div className="flex items-start gap-2 min-w-0">
+                      <Mail className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <div className="min-w-0">
                         <p className="text-slate-400 text-xs">Email</p>
-                        <p className="text-slate-800">
+                        <p className="text-slate-800 break-all">
                           {viewStaff.email || "-"}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Phone className="w-4 h-4 text-slate-400 mt-0.5" />
+                      <Phone className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-slate-400 text-xs">Mobile</p>
                         <p className="text-slate-800">
@@ -927,7 +963,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <Calendar className="w-4 h-4 text-slate-400 mt-0.5" />
+                      <Calendar className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-slate-400 text-xs">Date of Birth</p>
                         <p className="text-slate-800">
@@ -942,7 +978,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                       </p>
                     </div>
                     <div className="sm:col-span-2 flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
+                      <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                       <div>
                         <p className="text-slate-400 text-xs">Address</p>
                         <p className="text-slate-800">
@@ -954,7 +990,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                 </div>
 
                 {/* Professional */}
-                <div className="border border-slate-200 rounded-xl p-5">
+                <div className="border border-slate-200 rounded-xl p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Briefcase className="w-4 h-4 text-sky-600" />
                     <h4 className="text-sm font-semibold text-slate-700 uppercase">
@@ -1005,7 +1041,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                 </div>
 
                 {/* Bank */}
-                <div className="border border-slate-200 rounded-xl p-5">
+                <div className="border border-slate-200 rounded-xl p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Shield className="w-4 h-4 text-sky-600" />
                     <h4 className="text-sm font-semibold text-slate-700 uppercase">
@@ -1015,7 +1051,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-slate-400 text-xs">Account Number</p>
-                      <p className="text-slate-800 font-mono">
+                      <p className="text-slate-800 font-mono break-all">
                         {viewStaff.accountNumber || "-"}
                       </p>
                     </div>
@@ -1028,123 +1064,116 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                   </div>
                 </div>
 
+                {/* ==================== DOCUMENTS ==================== */}
+
+                <div>
+
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="w-4 h-4 text-sky-600" />
+
+                    <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                      Documents
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    {[
+                      {
+                        label: "Aadhaar Front",
+                        documentType: "aadhaar-front",
+                        url: viewStaff?.aadhaarFrontUrl
+                      },
+                      {
+                        label: "Aadhaar Back",
+                        documentType: "aadhaar-back",
+                        url: viewStaff?.aadhaarBackUrl
+                      },
+                      {
+                        label: "PAN Card",
+                        documentType: "pan",
+                        url: viewStaff?.panCardUrl
+                      },
+                      {
+                        label: "Degree Certificate",
+                        documentType: "degree",
+                        url: viewStaff?.degreeCertificateUrl
+                      },
+                      {
+                        label: "Resume",
+                        documentType: "resume",
+                        url: viewStaff?.resumeUrl
+                      }
+                    ].map((doc) => (
+
+                      <div
+                        key={doc.label}
+                        className="flex items-center justify-between gap-3 p-3.5 border border-slate-200 rounded-xl bg-slate-50/70"
+                      >
+
+                        <span className="text-sm font-medium text-slate-700">
+                          {doc.label}
+                        </span>
+
+                        <div className="flex items-center gap-3 shrink-0">
+
+                          {doc.url ? (
+                            <>
+
+                              {/* VIEW */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  openDocumentPreview(
+                                    doc.label,
+                                    doc.documentType
+                                  )
+                                }
+                                className="text-sm font-medium text-sky-600 hover:text-sky-700 hover:underline"
+                              >
+                                View
+                              </button>
 
 
+                              {/* DOWNLOAD */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleDocumentDownload(
+                                    doc.label,
+                                    doc.documentType
+                                  )
+                                }
+                                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline"
+                              >
+                                Download
+                              </button>
 
-                {/* Documents */}
- {/* ==================== DOCUMENTS ==================== */}
+                            </>
+                          ) : (
 
-<div className="mt-6">
+                            <span className="text-xs text-slate-400">
+                              Not Uploaded
+                            </span>
 
-  <div className="flex items-center gap-2 mb-4">
-    <FileText className="w-4 h-4 text-sky-600" />
+                          )}
 
-    <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-      Documents
-    </h3>
-  </div>
+                        </div>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      </div>
 
-    {[
-      {
-        label: "Aadhaar Front",
-        documentType: "aadhaar-front",
-        url: viewStaff?.aadhaarFrontUrl
-      },
-      {
-        label: "Aadhaar Back",
-        documentType: "aadhaar-back",
-        url: viewStaff?.aadhaarBackUrl
-      },
-      {
-        label: "PAN Card",
-        documentType: "pan",
-        url: viewStaff?.panCardUrl
-      },
-      {
-        label: "Degree Certificate",
-        documentType: "degree",
-        url: viewStaff?.degreeCertificateUrl
-      },
-      {
-        label: "Resume",
-        documentType: "resume",
-        url: viewStaff?.resumeUrl
-      }
-    ].map((doc) => (
+                    ))}
 
-      <div
-        key={doc.label}
-        className="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl bg-slate-50/70"
-      >
+                  </div>
 
-        <span className="text-sm font-medium text-slate-700">
-          {doc.label}
-        </span>
-
-        <div className="flex items-center gap-3">
-
-          {doc.url ? (
-            <>
-
-              {/* VIEW */}
-              <button
-                type="button"
-                onClick={() =>
-                  openDocumentPreview(
-                    doc.label,
-                    doc.documentType
-                  )
-                }
-                className="text-sm font-medium text-sky-600 hover:text-sky-700 hover:underline"
-              >
-                View
-              </button>
-
-
-              {/* DOWNLOAD */}
-              <button
-                type="button"
-                onClick={() =>
-                  handleDocumentDownload(
-                    doc.label,
-                    doc.documentType
-                  )
-                }
-                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline"
-              >
-                Download
-              </button>
-
-            </>
-          ) : (
-
-            <span className="text-xs text-slate-400">
-              Not Uploaded
-            </span>
-
-          )}
-
-        </div>
-
-      </div>
-
-    ))}
-
-  </div>
-
-</div>
-
-
-
+                </div>
 
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
                   <button
                     onClick={() => setViewOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
                   >
                     Close
                   </button>
@@ -1153,7 +1182,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
                       setViewOpen(false);
                       navigate(`/staff-form/${viewStaff.id}`);
                     }}
-                    className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
                   >
                     Edit Staff
                   </button>
@@ -1168,10 +1197,83 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
         </div>
       )}
 
+
+
+
+
+
+      {/* Permanent Staff Delete Confirmation Modal */}
+      {deleteConfirmOpen && staffToDelete && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800">
+                  Permanently Delete Staff?
+                </h3>
+                <p className="text-sm text-slate-500">
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 mb-3">
+              Are you sure you want to permanently delete{" "}
+              <span className="font-semibold text-slate-800">
+                {getFullName(staffToDelete)}
+              </span>
+              ?
+            </p>
+
+            <p className="text-sm text-rose-600 bg-rose-50 border border-rose-100 rounded-xl p-3 mb-6">
+              The staff record, login account, attendance, salary records,
+              leave requests, and uploaded files may be permanently deleted.
+            </p>
+
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteConfirmOpen(false);
+                  setStaffToDelete(null);
+                }}
+                disabled={deleteLoading}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteStaff}
+                disabled={deleteLoading}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium disabled:opacity-50"
+              >
+                {deleteLoading ? "Deleting..." : "Delete Permanently"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+
+
+
+
+
+
+
+
       {/* Status Confirm Modal */}
       {confirmOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-sm">
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
               Confirm Status Change
             </h3>
@@ -1194,14 +1296,14 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
               <button
                 onClick={() => setConfirmOpen(false)}
                 disabled={statusLoading}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
               >
                 No
               </button>
               <button
                 onClick={handleConfirmStatus}
                 disabled={statusLoading}
-                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium disabled:opacity-60"
+                className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium disabled:opacity-60"
               >
                 {statusLoading ? "Updating..." : "Yes"}
               </button>
@@ -1219,15 +1321,13 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
 
       {/* Document Preview Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-200">
               <h3 className="font-semibold text-slate-800">
                 {previewDoc.label}
               </h3>
               <div className="flex items-center gap-2">
-
-        
                 <button
                   type="button"
                   onClick={() => {
@@ -1243,7 +1343,7 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto bg-slate-100 p-4 min-h-[400px] flex items-center justify-center">
+            <div className="flex-1 overflow-auto bg-slate-100 p-3 sm:p-4 min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
               {previewDoc.isImage ? (
                 <img
                   src={previewDoc.url}
@@ -1280,49 +1380,47 @@ title={photoUrls[viewStaff.id] ? "Click to view photo" : ""}
 
 
 
-{/* ==================== PHOTO PREVIEW MODAL ==================== */}
+      {/* ==================== PHOTO PREVIEW MODAL ==================== */}
 
-{photoPreviewOpen &&
-  viewStaff &&
-  photoUrls[viewStaff.id] && (
-  <div
-    className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4"
-    onClick={() => setPhotoPreviewOpen(false)}
-  >
-    <div
-      className="relative max-w-4xl max-h-[90vh]"
-      onClick={(e) => e.stopPropagation()}
-    >
+      {photoPreviewOpen &&
+        viewStaff &&
+        photoUrls[viewStaff.id] && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4"
+          onClick={() => setPhotoPreviewOpen(false)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
 
-      {/* Close Button */}
-      <button
-        type="button"
-        onClick={() => setPhotoPreviewOpen(false)}
-        className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-slate-700 shadow-lg flex items-center justify-center hover:bg-slate-100 transition"
-        title="Close"
-      >
-        <X className="w-5 h-5" />
-      </button>
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setPhotoPreviewOpen(false)}
+              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-slate-700 shadow-lg flex items-center justify-center hover:bg-slate-100 transition"
+              title="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-      {/* Staff Photo */}
-      <img
-       src={photoUrls[viewStaff.id]}
-        alt={getFullName(viewStaff)}
-        className="max-w-[90vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl"
-      />
+            {/* Staff Photo */}
+            <img
+              src={photoUrls[viewStaff.id]}
+              alt={getFullName(viewStaff)}
+              className="max-w-[90vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl"
+            />
 
-      {/* Name */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-        <div className="px-4 py-2 rounded-xl bg-black/60 text-white text-sm font-medium backdrop-blur-sm">
-          {getFullName(viewStaff)}
+            {/* Name */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="px-4 py-2 rounded-xl bg-black/60 text-white text-sm font-medium backdrop-blur-sm">
+                {getFullName(viewStaff)}
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
-
-    </div>
-  </div>
-)}
-
-
+      )}
 
     </div>
   );

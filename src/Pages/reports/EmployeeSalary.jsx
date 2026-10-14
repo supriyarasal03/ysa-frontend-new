@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+
 import {
     Box,
     Button,
@@ -76,6 +79,8 @@ const EmployeeSalary = () => {
 
     const [history, setHistory] =
         useState(null);
+
+        const navigate = useNavigate();
 
 
     // ==========================================================
@@ -513,14 +518,31 @@ const coachEmployees = (
                 }}
             >
 
-                <Box>
+               
+<Box>
+    <Button
+        variant="outlined"
+        startIcon={<ArrowLeft size={18} />}
+        onClick={() => navigate("/admin/reports")}
+        sx={{
+            mb: 2,
+            textTransform: "none",
+            fontWeight: 600,
+            borderRadius: "10px",
+        }}
+    >
+        Back to Reports
+    </Button>
 
-                    <Typography
-                        variant="h4"
-                        fontWeight={700}
-                    >
-                        Employee Salary
-                    </Typography>
+    <Typography
+        variant="h4"
+        fontWeight={700}
+    >
+        Employee Salary
+    </Typography>
+
+
+
 
                     <Typography
                         variant="body2"
