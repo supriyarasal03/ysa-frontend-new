@@ -38,10 +38,26 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 //import { viewOrDownloadFile } from "../../utils/fileHelper";
 
 const API_BASE = ""; // change if needed
+
+// Forces every modal overlay to cover the full screen and stay centered,
+// regardless of any layout / global CSS.
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  margin: 0,
+  transform: "none",
+};
 
 export default function StaffManagement() {
   const navigate = useNavigate();
@@ -863,11 +879,27 @@ export default function StaffManagement() {
         </div>
       </div>
 
+      {/* ========== ALL MODALS (rendered into document.body via portal) ========== */}
+      {createPortal(
+        <>
+
       {/* ========== VIEW DETAIL MODAL ========== */}
       {viewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
-            <div className="sticky top-0 bg-slate-900 text-white px-4 sm:px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+       <div
+  style={overlayStyle}
+  className="z-[9999] bg-black/50 p-4"
+  onClick={() => setViewOpen(false)}
+>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto max-h-[88vh] overflow-y-auto overscroll-contain"
+          >
+
+
+            <div className="sticky top-0 bg-slate-900 text-white px-4 sm:px-6 py-4 flex items-center
+             justify-between rounded-t-2xl z-20 shadow-sm">
+
+
               <h2 className="text-lg font-semibold">Staff Details</h2>
               <button
                 onClick={() => setViewOpen(false)}
@@ -884,10 +916,19 @@ export default function StaffManagement() {
             ) : viewStaff ? (
               <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
                 {/* Photo + basic */}
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
+
+
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+
+
 
                   <div
-                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shrink-0 cursor-pointer group"
+
+
+                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-br
+                     from-sky-400 to-blue-600 flex items-center
+                     justify-center text-white text-2xl font-bold shrink-0 cursor-pointer group"
+
                     onClick={() => {
                       if (photoUrls[viewStaff.id]) {
                         setPhotoPreviewOpen(true);
@@ -943,7 +984,10 @@ export default function StaffManagement() {
                       Personal Information
                     </h4>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 text-sm">
+
+
                     <div className="flex items-start gap-2 min-w-0">
                       <Mail className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                       <div className="min-w-0">
@@ -990,7 +1034,11 @@ export default function StaffManagement() {
                 </div>
 
                 {/* Professional */}
-                <div className="border border-slate-200 rounded-xl p-4 sm:p-5">
+
+                <div className="border border-slate-200 rounded-xl p-4 sm:p-6">
+
+
+
                   <div className="flex items-center gap-2 mb-4">
                     <Briefcase className="w-4 h-4 text-sky-600" />
                     <h4 className="text-sm font-semibold text-slate-700 uppercase">
@@ -1204,7 +1252,7 @@ export default function StaffManagement() {
 
       {/* Permanent Staff Delete Confirmation Modal */}
       {deleteConfirmOpen && staffToDelete && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-3 sm:p-4">
+        <div style={overlayStyle} className="z-[10001] bg-black/60 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
@@ -1272,7 +1320,7 @@ export default function StaffManagement() {
 
       {/* Status Confirm Modal */}
       {confirmOpen && selectedStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+        <div style={overlayStyle} className="z-[9999] bg-black/60 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-sm">
             <h3 className="text-lg font-semibold text-slate-800 mb-2">
               Confirm Status Change
@@ -1321,7 +1369,7 @@ export default function StaffManagement() {
 
       {/* Document Preview Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-3 sm:p-4">
+        <div style={overlayStyle} className="z-[10000] bg-black/60 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-200">
               <h3 className="font-semibold text-slate-800">
@@ -1386,7 +1434,8 @@ export default function StaffManagement() {
         viewStaff &&
         photoUrls[viewStaff.id] && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4"
+          style={overlayStyle}
+          className="z-[10002] bg-black/75 p-4"
           onClick={() => setPhotoPreviewOpen(false)}
         >
           <div
@@ -1398,7 +1447,9 @@ export default function StaffManagement() {
             <button
               type="button"
               onClick={() => setPhotoPreviewOpen(false)}
-              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-slate-700 shadow-lg flex items-center justify-center hover:bg-slate-100 transition"
+              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full
+               bg-white text-slate-700 shadow-lg flex items-center justify-center
+                hover:bg-slate-100 transition"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -1420,6 +1471,10 @@ export default function StaffManagement() {
 
           </div>
         </div>
+      )}
+
+        </>,
+        document.body
       )}
 
     </div>

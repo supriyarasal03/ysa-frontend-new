@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import {
   Search,
@@ -738,464 +739,479 @@ export default function PhysiotherapistManagement() {
       </div>
 
       {/* ======================================================
-          VIEW MODAL
+          VIEW MODAL (rendered via portal into document.body)
       ====================================================== */}
 
-      {viewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-slate-900 text-white px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-lg font-semibold">
-                Physiotherapist Details
-              </h2>
+      {viewOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+              <div className="sticky top-0 bg-slate-900 text-white px-6 py-4 flex items-center justify-between z-10 min-h-[64px]">
+                <h2 className="text-lg font-semibold">
+                  Physiotherapist Details
+                </h2>
 
-              <button
-                onClick={() => {
-                  setViewOpen(false);
-                  setSelectedPhysiotherapist(null);
-                }}
-                className="p-1.5 hover:bg-white/10 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {viewLoading ? (
-              <div className="p-16 text-center text-slate-500">
-                Loading details...
-              </div>
-            ) : selectedPhysiotherapist ? (
-              <div className="p-6 space-y-6">
-                {/* BASIC */}
-                <div className="flex flex-col sm:flex-row gap-5">
-                  <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold">
-                    {getInitials(selectedPhysiotherapist)}
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-800">
-                      {getFullName(selectedPhysiotherapist)}
-                    </h3>
-
-                    <p className="text-sm text-slate-500 mt-1">
-                      Employee ID:{" "}
-                      {selectedPhysiotherapist.employeeId || "-"}
-                    </p>
-
-                    <span
-                      className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs font-medium ${
-                        isActive(selectedPhysiotherapist)
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-rose-50 text-rose-700"
-                      }`}
-                    >
-                      {isActive(selectedPhysiotherapist)
-                        ? "Active"
-                        : "Inactive"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* PERSONAL */}
-                <div className="border border-slate-200 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <User className="w-4 h-4 text-sky-600" />
-
-                    <h4 className="text-sm font-semibold text-slate-700 uppercase">
-                      Personal Information
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <InfoItem
-                      icon={<Mail />}
-                      label="Email"
-                      value={selectedPhysiotherapist.email}
-                    />
-
-                    <InfoItem
-                      icon={<Phone />}
-                      label="Mobile"
-                      value={selectedPhysiotherapist.mobileNumber}
-                    />
-
-                    <InfoItem
-                      icon={<Calendar />}
-                      label="Date of Birth"
-                      value={formatDate(selectedPhysiotherapist.dateOfBirth)}
-                    />
-
-                    <InfoItem
-                      label="Gender"
-                      value={formatGender(selectedPhysiotherapist.gender)}
-                    />
-
-                    <InfoItem
-                      label="Blood Group"
-                      value={selectedPhysiotherapist.bloodGroup}
-                    />
-
-                    <InfoItem
-                      icon={<MapPin />}
-                      label="Address"
-                      value={selectedPhysiotherapist.address}
-                    />
-                  </div>
-                </div>
-
-                {/* PROFESSIONAL */}
-                <div className="border border-slate-200 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Briefcase className="w-4 h-4 text-sky-600" />
-
-                    <h4 className="text-sm font-semibold text-slate-700 uppercase">
-                      Professional Details
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <InfoItem
-                      icon={<GraduationCap />}
-                      label="Qualification"
-                      value={selectedPhysiotherapist.qualification}
-                    />
-
-                    <InfoItem
-                      label="Specialization"
-                      value={selectedPhysiotherapist.specialization}
-                    />
-
-                    <InfoItem
-                      label="Experience"
-                      value={
-                        selectedPhysiotherapist.experienceYears != null
-                          ? `${selectedPhysiotherapist.experienceYears} years`
-                          : "-"
-                      }
-                    />
-
-                    <InfoItem
-                      label="Joining Date"
-                      value={formatDate(selectedPhysiotherapist.joiningDate)}
-                    />
-
-                    <InfoItem
-                      label="Monthly Salary"
-                      value={
-                        selectedPhysiotherapist.monthlySalary != null
-                          ? `₹ ${Number(
-                              selectedPhysiotherapist.monthlySalary
-                            ).toLocaleString("en-IN")}`
-                          : "-"
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* BANK DETAILS */}
-                <div className="border border-slate-200 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Briefcase className="w-4 h-4 text-sky-600" />
-
-                    <h4 className="text-sm font-semibold text-slate-700 uppercase">
-                      Bank Details
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <InfoItem
-                      label="Bank Name"
-                      value={selectedPhysiotherapist.bankName}
-                    />
-
-                    <InfoItem
-                      label="Branch Name"
-                      value={selectedPhysiotherapist.branchName}
-                    />
-
-                    <InfoItem
-                      label="Account Holder Name"
-                      value={selectedPhysiotherapist.accountHolderName}
-                    />
-
-                    <InfoItem
-                      label="Account Number"
-                      value={selectedPhysiotherapist.accountNumber}
-                    />
-
-                    <InfoItem
-                      label="IFSC Code"
-                      value={selectedPhysiotherapist.ifscCode}
-                    />
-                  </div>
-                </div>
-
-                {/* DOCUMENTS */}
-                <div className="border border-slate-200 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-4 h-4 text-sky-600" />
-
-                    <h4 className="text-sm font-semibold text-slate-700 uppercase">
-                      Documents
-                    </h4>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <DocumentRow
-                      label="Profile Photo"
-                      available={selectedPhysiotherapist.profilePhotoAvailable}
-                      onView={() =>
-                        openDocument("Profile Photo", "profile-photo")
-                      }
-                    />
-
-                    <DocumentRow
-                      label="Live Photo"
-                      available={selectedPhysiotherapist.livePhotoAvailable}
-                      onView={() => openDocument("Live Photo", "live-photo")}
-                    />
-
-                    <DocumentRow
-                      label="Aadhaar Front"
-                      available={selectedPhysiotherapist.aadhaarFrontAvailable}
-                      onView={() =>
-                        openDocument("Aadhaar Front", "aadhaar-front")
-                      }
-                    />
-
-                    <DocumentRow
-                      label="Aadhaar Back"
-                      available={selectedPhysiotherapist.aadhaarBackAvailable}
-                      onView={() =>
-                        openDocument("Aadhaar Back", "aadhaar-back")
-                      }
-                    />
-
-                    <DocumentRow
-                      label="PAN Card"
-                      available={selectedPhysiotherapist.panCardAvailable}
-                      onView={() => openDocument("PAN Card", "pan")}
-                    />
-
-                    <DocumentRow
-                      label="Degree Certificate"
-                      available={
-                        selectedPhysiotherapist.degreeCertificateAvailable
-                      }
-                      onView={() =>
-                        openDocument("Degree Certificate", "degree")
-                      }
-                    />
-
-                    <DocumentRow
-                      label="Experience Certificate"
-                      available={
-                        selectedPhysiotherapist.experienceCertificateAvailable
-                      }
-                      onView={() =>
-                        openDocument("Experience Certificate", "experience")
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* ACTIONS */}
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setViewOpen(false)}
-                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium"
-                  >
-                    Close
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setViewOpen(false);
-
-                      navigate(
-                        `/admin/physiotherapist-form/${selectedPhysiotherapist.id}`
-                      );
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
-                  >
-                    Edit Physiotherapist
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-16 text-center text-slate-500">
-                Physiotherapist not found
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================
-          STATUS CONFIRM
-      ====================================================== */}
-
-      {confirmOpen && statusTarget && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">
-              Confirm Status Change
-            </h3>
-
-            <p className="text-sm text-slate-600 mb-6">
-              Set{" "}
-              <span className="font-medium text-slate-800">
-                "{getFullName(statusTarget)}"
-              </span>{" "}
-              to{" "}
-              <span
-                className={
-                  isActive(statusTarget)
-                    ? "text-rose-600 font-medium"
-                    : "text-emerald-600 font-medium"
-                }
-              >
-                {isActive(statusTarget) ? "Inactive" : "Active"}
-              </span>
-            </p>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                disabled={statusLoading}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleStatusChange}
-                disabled={statusLoading}
-                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm disabled:opacity-60"
-              >
-                {statusLoading ? "Updating..." : "Confirm"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================
-          DOCUMENT PREVIEW
-      ====================================================== */}
-
-      {documentPreview && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b">
-              <h3 className="font-semibold text-slate-800">
-                {documentPreview.label}
-              </h3>
-
-              <button
-                onClick={closeDocument}
-                className="p-1.5 hover:bg-slate-100 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-auto bg-slate-100 p-4 min-h-[400px] flex items-center justify-center">
-              {documentPreview.isImage ? (
-                <img
-                  src={documentPreview.url}
-                  alt={documentPreview.label}
-                  className="max-w-full max-h-[70vh] rounded-lg shadow"
-                />
-              ) : documentPreview.isPdf ? (
-                <iframe
-                  src={documentPreview.url}
-                  title={documentPreview.label}
-                  className="w-full h-[70vh] bg-white"
-                />
-              ) : (
-                <a
-                  href={documentPreview.url}
-                  download
-                  className="px-4 py-2 bg-sky-600 text-white rounded-lg"
+                <button
+                  onClick={() => {
+                    setViewOpen(false);
+                    setSelectedPhysiotherapist(null);
+                  }}
+                  className="p-1.5 hover:bg-white/10 rounded-lg"
                 >
-                  Download File
-                </a>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {viewLoading ? (
+                <div className="p-16 text-center text-slate-500">
+                  Loading details...
+                </div>
+              ) : selectedPhysiotherapist ? (
+                <div className="p-4 lg:p-5 space-y-4">
+                  {/* BASIC */}
+                  <div className="flex flex-col sm:flex-row gap-5">
+                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+                      {getInitials(selectedPhysiotherapist)}
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-800">
+                        {getFullName(selectedPhysiotherapist)}
+                      </h3>
+
+                      <p className="text-sm text-slate-500 mt-1">
+                        Employee ID:{" "}
+                        {selectedPhysiotherapist.employeeId || "-"}
+                      </p>
+
+                      <span
+                        className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs font-medium ${
+                          isActive(selectedPhysiotherapist)
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-rose-50 text-rose-700"
+                        }`}
+                      >
+                        {isActive(selectedPhysiotherapist)
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* PERSONAL */}
+                  <div className="border border-slate-200 rounded-xl p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <User className="w-4 h-4 text-sky-600" />
+
+                      <h4 className="text-sm font-semibold text-slate-700 uppercase">
+                        Personal Information
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <InfoItem
+                        icon={<Mail />}
+                        label="Email"
+                        value={selectedPhysiotherapist.email}
+                      />
+
+                      <InfoItem
+                        icon={<Phone />}
+                        label="Mobile"
+                        value={selectedPhysiotherapist.mobileNumber}
+                      />
+
+                      <InfoItem
+                        icon={<Calendar />}
+                        label="Date of Birth"
+                        value={formatDate(selectedPhysiotherapist.dateOfBirth)}
+                      />
+
+                      <InfoItem
+                        label="Gender"
+                        value={formatGender(selectedPhysiotherapist.gender)}
+                      />
+
+                      <InfoItem
+                        label="Blood Group"
+                        value={selectedPhysiotherapist.bloodGroup}
+                      />
+
+                      <InfoItem
+                        icon={<MapPin />}
+                        label="Address"
+                        value={selectedPhysiotherapist.address}
+                      />
+                    </div>
+                  </div>
+
+                  {/* PROFESSIONAL */}
+                  <div className="border border-slate-200 rounded-xl p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Briefcase className="w-4 h-4 text-sky-600" />
+
+                      <h4 className="text-sm font-semibold text-slate-700 uppercase">
+                        Professional Details
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <InfoItem
+                        icon={<GraduationCap />}
+                        label="Qualification"
+                        value={selectedPhysiotherapist.qualification}
+                      />
+
+                      <InfoItem
+                        label="Specialization"
+                        value={selectedPhysiotherapist.specialization}
+                      />
+
+                      <InfoItem
+                        label="Experience"
+                        value={
+                          selectedPhysiotherapist.experienceYears != null
+                            ? `${selectedPhysiotherapist.experienceYears} years`
+                            : "-"
+                        }
+                      />
+
+                      <InfoItem
+                        label="Joining Date"
+                        value={formatDate(selectedPhysiotherapist.joiningDate)}
+                      />
+
+                      <InfoItem
+                        label="Monthly Salary"
+                        value={
+                          selectedPhysiotherapist.monthlySalary != null
+                            ? `₹ ${Number(
+                                selectedPhysiotherapist.monthlySalary
+                              ).toLocaleString("en-IN")}`
+                            : "-"
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* BANK DETAILS */}
+                  <div className="border border-slate-200 rounded-xl p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Briefcase className="w-4 h-4 text-sky-600" />
+
+                      <h4 className="text-sm font-semibold text-slate-700 uppercase">
+                        Bank Details
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <InfoItem
+                        label="Bank Name"
+                        value={selectedPhysiotherapist.bankName}
+                      />
+
+                      <InfoItem
+                        label="Branch Name"
+                        value={selectedPhysiotherapist.branchName}
+                      />
+
+                      <InfoItem
+                        label="Account Holder Name"
+                        value={selectedPhysiotherapist.accountHolderName}
+                      />
+
+                      <InfoItem
+                        label="Account Number"
+                        value={selectedPhysiotherapist.accountNumber}
+                      />
+
+                      <InfoItem
+                        label="IFSC Code"
+                        value={selectedPhysiotherapist.ifscCode}
+                      />
+                    </div>
+                  </div>
+
+                  {/* DOCUMENTS */}
+                  <div className="border border-slate-200 rounded-xl p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileText className="w-4 h-4 text-sky-600" />
+
+                      <h4 className="text-sm font-semibold text-slate-700 uppercase">
+                        Documents
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <DocumentRow
+                        label="Profile Photo"
+                        available={
+                          selectedPhysiotherapist.profilePhotoAvailable
+                        }
+                        onView={() =>
+                          openDocument("Profile Photo", "profile-photo")
+                        }
+                      />
+
+                      <DocumentRow
+                        label="Live Photo"
+                        available={selectedPhysiotherapist.livePhotoAvailable}
+                        onView={() => openDocument("Live Photo", "live-photo")}
+                      />
+
+                      <DocumentRow
+                        label="Aadhaar Front"
+                        available={
+                          selectedPhysiotherapist.aadhaarFrontAvailable
+                        }
+                        onView={() =>
+                          openDocument("Aadhaar Front", "aadhaar-front")
+                        }
+                      />
+
+                      <DocumentRow
+                        label="Aadhaar Back"
+                        available={
+                          selectedPhysiotherapist.aadhaarBackAvailable
+                        }
+                        onView={() =>
+                          openDocument("Aadhaar Back", "aadhaar-back")
+                        }
+                      />
+
+                      <DocumentRow
+                        label="PAN Card"
+                        available={selectedPhysiotherapist.panCardAvailable}
+                        onView={() => openDocument("PAN Card", "pan")}
+                      />
+
+                      <DocumentRow
+                        label="Degree Certificate"
+                        available={
+                          selectedPhysiotherapist.degreeCertificateAvailable
+                        }
+                        onView={() =>
+                          openDocument("Degree Certificate", "degree")
+                        }
+                      />
+
+                      <DocumentRow
+                        label="Experience Certificate"
+                        available={
+                          selectedPhysiotherapist.experienceCertificateAvailable
+                        }
+                        onView={() =>
+                          openDocument("Experience Certificate", "experience")
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* ACTIONS */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setViewOpen(false)}
+                      className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium"
+                    >
+                      Close
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setViewOpen(false);
+
+                        navigate(
+                          `/admin/physiotherapist-form/${selectedPhysiotherapist.id}`
+                        );
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
+                    >
+                      Edit Physiotherapist
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-16 text-center text-slate-500">
+                  Physiotherapist not found
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* ======================================================
-          DELETE CONFIRMATION MODAL
+          STATUS CONFIRM (portal)
       ====================================================== */}
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-rose-100">
-                <Trash2 className="h-5 w-5 text-rose-600" />
-              </div>
+      {confirmOpen &&
+        statusTarget &&
+        createPortal(
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                Confirm Status Change
+              </h3>
 
-              <div>
-                <h3 className="text-lg font-semibold text-slate-800">
-                  Delete Physiotherapist?
-                </h3>
-                <p className="text-sm text-slate-500">
-                  This action cannot be undone.
-                </p>
-              </div>
-            </div>
-
-            <p className="mb-4 text-sm text-slate-600">
-              Are you sure you want to permanently delete{" "}
-              <span className="font-semibold text-slate-800">
-                {getFullName(deleteTarget)}
-              </span>
-              ?
-            </p>
-
-            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              The physiotherapist's login and salary records will be
-              deleted. Assigned players will remain in the system, and
-              their existing fees and payments must remain unchanged.
-            </div>
-
-            {error && (
-              <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-                {error}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!deleteLoading) {
-                    setDeleteTarget(null);
-                    setError("");
+              <p className="text-sm text-slate-600 mb-6">
+                Set{" "}
+                <span className="font-medium text-slate-800">
+                  "{getFullName(statusTarget)}"
+                </span>{" "}
+                to{" "}
+                <span
+                  className={
+                    isActive(statusTarget)
+                      ? "text-rose-600 font-medium"
+                      : "text-emerald-600 font-medium"
                   }
-                }}
-                disabled={deleteLoading}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 disabled:opacity-50"
-              >
-                Cancel
-              </button>
+                >
+                  {isActive(statusTarget) ? "Inactive" : "Active"}
+                </span>
+              </p>
 
-              <button
-                type="button"
-                onClick={handleDeletePhysiotherapist}
-                disabled={deleteLoading}
-                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {deleteLoading ? "Deleting..." : "Yes, Delete"}
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setConfirmOpen(false)}
+                  disabled={statusLoading}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleStatusChange}
+                  disabled={statusLoading}
+                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm disabled:opacity-60"
+                >
+                  {statusLoading ? "Updating..." : "Confirm"}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
+
+      {/* ======================================================
+          DOCUMENT PREVIEW (portal)
+      ====================================================== */}
+
+      {documentPreview &&
+        createPortal(
+          <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 border-b">
+                <h3 className="font-semibold text-slate-800">
+                  {documentPreview.label}
+                </h3>
+
+                <button
+                  onClick={closeDocument}
+                  className="p-1.5 hover:bg-slate-100 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto bg-slate-100 p-4 min-h-[400px] flex items-center justify-center">
+                {documentPreview.isImage ? (
+                  <img
+                    src={documentPreview.url}
+                    alt={documentPreview.label}
+                    className="max-w-full max-h-[70vh] rounded-lg shadow"
+                  />
+                ) : documentPreview.isPdf ? (
+                  <iframe
+                    src={documentPreview.url}
+                    title={documentPreview.label}
+                    className="w-full h-[70vh] bg-white"
+                  />
+                ) : (
+                  <a
+                    href={documentPreview.url}
+                    download
+                    className="px-4 py-2 bg-sky-600 text-white rounded-lg"
+                  >
+                    Download File
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* ======================================================
+          DELETE CONFIRMATION MODAL (portal)
+      ====================================================== */}
+
+      {deleteTarget &&
+        createPortal(
+          <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-rose-100">
+                  <Trash2 className="h-5 w-5 text-rose-600" />
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-800">
+                    Delete Physiotherapist?
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mb-4 text-sm text-slate-600">
+                Are you sure you want to permanently delete{" "}
+                <span className="font-semibold text-slate-800">
+                  {getFullName(deleteTarget)}
+                </span>
+                ?
+              </p>
+
+              <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                The physiotherapist's login and salary records will be
+                deleted. Assigned players will remain in the system, and
+                their existing fees and payments must remain unchanged.
+              </div>
+
+              {error && (
+                <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!deleteLoading) {
+                      setDeleteTarget(null);
+                      setError("");
+                    }
+                  }}
+                  disabled={deleteLoading}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-600 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDeletePhysiotherapist}
+                  disabled={deleteLoading}
+                  className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {deleteLoading ? "Deleting..." : "Yes, Delete"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
@@ -1207,11 +1223,9 @@ export default function PhysiotherapistManagement() {
 function InfoItem({ icon, label, value }) {
   return (
     <div className="flex items-start gap-2">
-      {icon && (
-        <div className="text-slate-400 mt-0.5">
-          {React.cloneElement(icon, { className: "w-4 h-4" })}
-        </div>
-      )}
+      <div className="w-4 h-4 mt-0.5 shrink-0 text-slate-400">
+        {icon && React.cloneElement(icon, { className: "w-4 h-4" })}
+      </div>
 
       <div>
         <p className="text-slate-400 text-xs">{label}</p>
