@@ -153,6 +153,7 @@ export default function SportManagmnet() {
           </p>
         </div>
 
+
         <button
           onClick={() => navigate("/sport-form")}
           className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition shadow-md hover:shadow-lg"
@@ -160,6 +161,9 @@ export default function SportManagmnet() {
           <Plus className="w-4 h-4" />
           Add New Sport
         </button>
+
+
+        
       </div>
 
       {/* Stats */}

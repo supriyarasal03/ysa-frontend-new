@@ -955,9 +955,15 @@ setTimeout(() => {
     };
   }, [stream]);
 
-  if (fetching) {
+
+
+
+
+
+
+    if (fetching) {
     return (
-      <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f1f5f9] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 px-8 py-6 text-slate-500">
           Loading staff details...
         </div>
@@ -965,21 +971,28 @@ setTimeout(() => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-900/95 p-0 md:p-4 lg:p-6 flex items-center justify-center">
-      <div className="w-full max-w-[1550px] max-h-[calc(100vh-2rem)] bg-white rounded-2xl border border-slate-300 shadow-2xl overflow-hidden flex flex-col">
+  const labelClass =
+    "block text-xs font-bold text-slate-600 uppercase mb-1.5";
 
-        {/* ================================================================
-            FORM HEADER
-        ================================================================= */}
-        <div className="shrink-0 bg-[#0f172a] text-white px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg md:text-xl font-bold tracking-tight">
+  const sectionHeaderClass =
+    "px-4 py-3.5 md:px-5 md:py-4 border-b border-slate-200 flex items-center gap-2";
+
+  const sectionTitleClass =
+    "text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wide leading-snug";
+
+  return (
+    <div className="min-h-screen bg-slate-900/95 p-0 md:p-4 lg:p-6 flex md:items-center justify-center">
+      <div className="w-full max-w-[1550px] md:max-h-[calc(100vh-2rem)] bg-white md:rounded-2xl md:border border-slate-300 shadow-2xl overflow-hidden flex flex-col">
+
+        {/* ================= HEADER ================= */}
+        <div className="shrink-0 bg-[#0f172a] text-white px-4 md:px-6 py-3.5 md:py-4 flex items-center justify-between gap-3">
+          <h1 className="text-base md:text-xl font-bold tracking-tight min-w-0">
             {isEdit ? "Edit Staff Member" : "Register New Staff Member"}
           </h1>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
             <span
-              className="text-slate-400"
+              className="hidden sm:inline text-slate-400"
               title="Staff registration form"
             >
               <Maximize2 className="w-5 h-5" />
@@ -989,7 +1002,7 @@ setTimeout(() => {
               type="button"
               onClick={() => navigate("/admin/staff-management")}
               disabled={loading}
-              className="text-slate-300 hover:text-white transition"
+              className="p-1 text-slate-300 hover:text-white transition"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -997,41 +1010,35 @@ setTimeout(() => {
           </div>
         </div>
 
-        {/* ================================================================
-            SCROLLABLE FORM
-        ================================================================= */}
+        {/* ================= FORM ================= */}
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="overflow-y-auto flex-1 bg-white"
+          className="md:overflow-y-auto flex-1 bg-slate-50 md:bg-white"
         >
-          <div className="p-4 md:p-6 space-y-6">
+          <div className="p-3 md:p-6 space-y-4 md:space-y-6">
 
-            {/* ============================================================
-                1. PERSONAL INFORMATION
-            ============================================================= */}
-            <section className="rounded-2xl border border-slate-200 bg-white">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-                <User className="w-5 h-5 text-sky-600" />
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                  1. Personal Information
-                </h2>
+            {/* ===== 1. PERSONAL INFORMATION ===== */}
+            <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <div className={sectionHeaderClass}>
+                <User className="w-5 h-5 text-sky-600 shrink-0" />
+                <h2 className={sectionTitleClass}>1. Personal Information</h2>
               </div>
 
-              <div className="p-5 md:p-6 space-y-6">
+              <div className="p-3 md:p-6 space-y-4 md:space-y-6">
 
                 {/* Profile Photo */}
                 <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Camera className="w-5 h-5 text-sky-600" />
-                      <h3 className="text-sm font-bold text-slate-700">
+                  <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Camera className="w-5 h-5 text-sky-600 shrink-0" />
+                      <h3 className="text-sm font-bold text-slate-700 leading-snug">
                         Live Profile Photo Capture
                       </h3>
                     </div>
 
                     <span
-                      className={`px-3 py-1 rounded-lg text-[11px] font-semibold ${
+                      className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${
                         photoPreview
                           ? "bg-emerald-50 text-emerald-600"
                           : "bg-slate-100 text-slate-500"
@@ -1041,11 +1048,11 @@ setTimeout(() => {
                     </span>
                   </div>
 
-                  <div className="p-5 flex flex-col lg:flex-row items-start gap-6">
+                  <div className="p-4 md:p-5 flex flex-col lg:flex-row items-center lg:items-start gap-5 lg:gap-6">
                     {/* Photo */}
                     <div className="relative shrink-0">
                       <div
-                        className="w-56 h-56 rounded-2xl border-2 border-slate-200 bg-[#0f172a] overflow-hidden flex items-center justify-center cursor-pointer group"
+                        className="w-48 h-48 sm:w-56 sm:h-56 rounded-2xl border-2 border-slate-200 bg-[#0f172a] overflow-hidden flex items-center justify-center cursor-pointer group"
                         onClick={() => {
                           if (photoPreview) setShowPhotoModal(true);
                         }}
@@ -1060,8 +1067,8 @@ setTimeout(() => {
                             }}
                           />
                         ) : (
-                          <div className="text-center">
-                            <User className="w-14 h-14 text-slate-500 mx-auto mb-2" />
+                          <div className="text-center px-3">
+                            <User className="w-12 h-12 text-slate-500 mx-auto mb-2" />
                             <p className="text-xs text-slate-400">
                               No Photo Captured
                             </p>
@@ -1077,38 +1084,38 @@ setTimeout(() => {
                               e.stopPropagation();
                               removePhoto();
                             }}
-                            className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-red-300 text-red-500 shadow-sm hover:bg-red-50 transition z-10"
+                            className="absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-red-300 text-red-500 shadow-sm hover:bg-red-50 transition z-10"
                             title="Remove photo"
                           >
                             <X className="w-4 h-4" />
                           </button>
 
                           <p className="text-[11px] text-center text-slate-400 mt-2">
-                            Click photo to enlarge
+                            Tap photo to enlarge
                           </p>
                         </>
                       )}
                     </div>
 
                     {/* Photo Actions */}
-                    <div className="flex-1 pt-2 lg:pt-12">
+                    <div className="w-full lg:flex-1 lg:pt-12 text-center lg:text-left">
                       <p className="text-sm font-medium text-slate-500 mb-4">
                         Capture a clear frontal photo for official academy staff identification.
                       </p>
 
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 lg:justify-start justify-center">
                         <button
                           type="button"
                           onClick={openCamera}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold transition whitespace-nowrap"
                         >
-                          <Camera className="w-4 h-4" />
+                          <Camera className="w-4 h-4 shrink-0" />
                           Open Camera & Capture
                         </button>
 
-                        <label>
-                          <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold cursor-pointer transition">
-                            <Upload className="w-4 h-4" />
+                        <label className="block w-full sm:w-auto">
+                          <span className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-sm font-semibold cursor-pointer transition whitespace-nowrap">
+                            <Upload className="w-4 h-4 shrink-0" />
                             Upload File Instead
                           </span>
 
@@ -1125,7 +1132,9 @@ setTimeout(() => {
                         JPG, PNG or WEBP. Maximum file size 5 MB.
                       </p>
 
-                      <ErrorText name="photo" />
+                      <div className="text-left">
+                        <ErrorText name="photo" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1134,7 +1143,7 @@ setTimeout(() => {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       First Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1150,7 +1159,7 @@ setTimeout(() => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Last Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1166,7 +1175,7 @@ setTimeout(() => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Phone Number <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1183,7 +1192,7 @@ setTimeout(() => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Gender <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -1202,7 +1211,7 @@ setTimeout(() => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Date of Birth <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1218,7 +1227,7 @@ setTimeout(() => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Staff Role <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -1239,7 +1248,7 @@ setTimeout(() => {
                   </div>
 
                   <div className="md:col-span-2 xl:col-span-3">
-                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                    <label className={labelClass}>
                       Address <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -1247,13 +1256,11 @@ setTimeout(() => {
                       value={formData.address}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      rows={2}
+                      rows={3}
                       maxLength={255}
                       placeholder="Enter complete address"
                       className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white ${
-                        errors.address
-                          ? "border-red-500"
-                          : "border-slate-200"
+                        errors.address ? "border-red-500" : "border-slate-200"
                       }`}
                     />
                     <ErrorText name="address" />
@@ -1262,29 +1269,17 @@ setTimeout(() => {
               </div>
             </section>
 
-            {/* ============================================================
-                2. PROFESSIONAL DETAILS
-            ============================================================= */}
-            <section className="rounded-2xl border border-slate-200 bg-white">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-sky-600" />
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                  2. Professional Details
-                </h2>
+            {/* ===== 2. PROFESSIONAL DETAILS ===== */}
+            <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <div className={sectionHeaderClass}>
+                <Briefcase className="w-5 h-5 text-sky-600 shrink-0" />
+                <h2 className={sectionTitleClass}>2. Professional Details</h2>
               </div>
 
-            
-            
-            
-              <div className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-
-               
-
-
-
+              <div className="p-3 md:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                  <label className={labelClass}>
                     Highest Qualification{" "}
                     <span className="text-red-500">*</span>
                   </label>
@@ -1301,9 +1296,7 @@ setTimeout(() => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-                    Experience
-                  </label>
+                  <label className={labelClass}>Experience</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -1324,7 +1317,7 @@ setTimeout(() => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                  <label className={labelClass}>
                     Monthly Salary <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -1345,73 +1338,55 @@ setTimeout(() => {
                   <ErrorText name="salary" />
                 </div>
 
-
-               {!isEdit && (
-  <div className="xl:col-span-2">
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      Joining Date <span className="text-red-500">*</span>
-    </label>
-    <input
-      type="date"
-      name="joiningDate"
-      value={formData.joiningDate}
-      min={today}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      className={fieldClass("joiningDate", "bg-white")}
-    />
-    <ErrorText name="joiningDate" />
-  </div>
-)}
-
-
-
+                {!isEdit && (
+                  <div className="md:col-span-2 xl:col-span-2">
+                    <label className={labelClass}>
+                      Joining Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="joiningDate"
+                      value={formData.joiningDate}
+                      min={today}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={fieldClass("joiningDate", "bg-white")}
+                    />
+                    <ErrorText name="joiningDate" />
+                  </div>
+                )}
               </div>
             </section>
 
-            {/* ============================================================
-                3. STAFF VERIFICATION & QUALIFICATION DOCUMENTS
-            ============================================================= */}
-            <section className="rounded-2xl border border-slate-200 bg-white">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-sky-600" />
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+            {/* ===== 3. DOCUMENTS ===== */}
+            <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <div className={sectionHeaderClass}>
+                <FileText className="w-5 h-5 text-sky-600 shrink-0" />
+                <h2 className={sectionTitleClass}>
                   3. Staff Verification & Qualification Documents
                 </h2>
               </div>
 
-              <div className="p-5 md:p-6">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-
-
-{DOCUMENTS
-  .filter(
-    (doc) =>
-      formData.role !== "CLEANING_STAFF" ||
-      !["degreeCertificate", "resume"].includes(doc.key)
-  )
-  .map((doc) => (
-
-
-
-
-
-
+              <div className="p-3 md:p-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 md:gap-4">
+                  {DOCUMENTS.filter(
+                    (doc) =>
+                      formData.role !== "CLEANING_STAFF" ||
+                      !["degreeCertificate", "resume"].includes(doc.key)
+                  ).map((doc) => (
                     <div
                       key={doc.key}
-                      className={`relative flex items-center justify-between gap-4 p-4 border rounded-xl bg-white ${
-                        errors[doc.key]
-                          ? "border-red-300"
-                          : "border-slate-200"
+                      className={`relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 border rounded-xl bg-white ${
+                        errors[doc.key] ? "border-red-300" : "border-slate-200"
                       }`}
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 pr-9 sm:pr-10">
                         <p className="text-sm font-semibold text-slate-800">
                           {doc.label}{" "}
                           {!isEdit && <span className="text-red-500">*</span>}
                         </p>
 
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-slate-400 mt-1 break-all">
                           {docPreviews[doc.key]
                             ? docPreviews[doc.key]
                             : doc.desc}
@@ -1420,9 +1395,9 @@ setTimeout(() => {
                         <ErrorText name={doc.key} />
                       </div>
 
-                      <label className="shrink-0">
-                        <span className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs font-semibold text-blue-700 hover:bg-blue-100 cursor-pointer transition">
-                          <Upload className="w-4 h-4" />
+                      <label className="block w-full sm:w-auto shrink-0">
+                        <span className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs font-semibold text-blue-700 hover:bg-blue-100 active:bg-blue-100 cursor-pointer transition whitespace-nowrap">
+                          <Upload className="w-4 h-4 shrink-0" />
                           {docPreviews[doc.key] ? "Change File" : "Upload File"}
                         </span>
 
@@ -1456,6 +1431,7 @@ setTimeout(() => {
                             }
                           }}
                           className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-red-200 text-red-500 hover:bg-red-50 transition shadow-sm"
+                          title="Remove file"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -1471,141 +1447,112 @@ setTimeout(() => {
               </div>
             </section>
 
-            {/* ============================================================
-                4. BANK DETAILS
-            ============================================================= */}
-            <section className="rounded-2xl border border-slate-200 bg-white">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-sky-600" />
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                  4. Bank Details
-                </h2>
+            {/* ===== 4. BANK DETAILS ===== */}
+            <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <div className={sectionHeaderClass}>
+                <Shield className="w-5 h-5 text-sky-600 shrink-0" />
+                <h2 className={sectionTitleClass}>4. Bank Details</h2>
               </div>
 
-
-              <div className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-
-  {/* Bank Name */}
-  <div>
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      Bank Name <span className="text-red-500">*</span>
-    </label>
-
-    <input
-      type="text"
-      name="bankName"
-      value={formData.bankName}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      maxLength={100}
-      placeholder="e.g. State Bank of India"
-      className={fieldClass("bankName", "bg-white")}
-    />
-
-    <ErrorText name="bankName" />
-  </div>
-
-  {/* Branch Name */}
-  <div>
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      Branch Name <span className="text-red-500">*</span>
-    </label>
-
-    <input
-      type="text"
-      name="branchName"
-      value={formData.branchName}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      maxLength={100}
-      placeholder="e.g. Pune Main Branch"
-      className={fieldClass("branchName", "bg-white")}
-    />
-
-    <ErrorText name="branchName" />
-  </div>
-
-  {/* Account Holder Name */}
-  <div>
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      Account Holder Name <span className="text-red-500">*</span>
-    </label>
-
-    <input
-      type="text"
-      name="accountHolderName"
-      value={formData.accountHolderName}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      maxLength={100}
-      placeholder="e.g. Sunita Sharma"
-      className={fieldClass("accountHolderName", "bg-white")}
-    />
-
-    <ErrorText name="accountHolderName" />
-  </div>
-
-  {/* Account Number */}
-  <div>
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      Account Number <span className="text-red-500">*</span>
-    </label>
-
-    <input
-      name="accountNumber"
-      value={formData.accountNumber}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      inputMode="numeric"
-      maxLength={18}
-      placeholder="9-18 digits"
-      className={fieldClass("accountNumber", "bg-white font-mono")}
-    />
-
-    <ErrorText name="accountNumber" />
-  </div>
-
-  {/* IFSC Code */}
-  <div>
-    <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-      IFSC Code <span className="text-red-500">*</span>
-    </label>
-
-    <input
-      name="ifscCode"
-      value={formData.ifscCode}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      maxLength={11}
-      placeholder="e.g. SBIN0001234"
-      className={fieldClass("ifscCode", "bg-white uppercase")}
-    />
-
-    <ErrorText name="ifscCode" />
-  </div>
-
-</div>
-
-
-
-
-            </section>
-
-            {/* ============================================================
-                5. ACCOUNT & CREDENTIALS
-            ============================================================= */}
-            <section className="rounded-2xl border border-slate-200 bg-white">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-sky-600" />
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-                  5. Account & Credentials
-                </h2>
-              </div>
-
-              <div className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3 md:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                  <label className={labelClass}>
+                    Bank Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="bankName"
+                    value={formData.bankName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    maxLength={100}
+                    placeholder="e.g. State Bank of India"
+                    className={fieldClass("bankName", "bg-white")}
+                  />
+                  <ErrorText name="bankName" />
+                </div>
+
+                <div>
+                  <label className={labelClass}>
+                    Branch Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="branchName"
+                    value={formData.branchName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    maxLength={100}
+                    placeholder="e.g. Pune Main Branch"
+                    className={fieldClass("branchName", "bg-white")}
+                  />
+                  <ErrorText name="branchName" />
+                </div>
+
+                <div>
+                  <label className={labelClass}>
+                    Account Holder Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="accountHolderName"
+                    value={formData.accountHolderName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    maxLength={100}
+                    placeholder="e.g. Sunita Sharma"
+                    className={fieldClass("accountHolderName", "bg-white")}
+                  />
+                  <ErrorText name="accountHolderName" />
+                </div>
+
+                <div>
+                  <label className={labelClass}>
+                    Account Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="accountNumber"
+                    value={formData.accountNumber}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    inputMode="numeric"
+                    maxLength={18}
+                    placeholder="9-18 digits"
+                    className={fieldClass("accountNumber", "bg-white font-mono")}
+                  />
+                  <ErrorText name="accountNumber" />
+                </div>
+
+                <div>
+                  <label className={labelClass}>
+                    IFSC Code <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="ifscCode"
+                    value={formData.ifscCode}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    maxLength={11}
+                    placeholder="e.g. SBIN0001234"
+                    className={fieldClass("ifscCode", "bg-white uppercase")}
+                  />
+                  <ErrorText name="ifscCode" />
+                </div>
+              </div>
+            </section>
+
+            {/* ===== 5. ACCOUNT & CREDENTIALS ===== */}
+            <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <div className={sectionHeaderClass}>
+                <Shield className="w-5 h-5 text-sky-600 shrink-0" />
+                <h2 className={sectionTitleClass}>5. Account & Credentials</h2>
+              </div>
+
+              <div className="p-3 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div>
+                  <label className={labelClass}>
                     Username <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1622,7 +1569,7 @@ setTimeout(() => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
+                  <label className={labelClass}>
                     Email <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1639,61 +1586,51 @@ setTimeout(() => {
                   <ErrorText name="email" />
                 </div>
 
+                {!isEdit && (
+                  <>
+                    <div>
+                      <label className={labelClass}>
+                        Password <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        autoComplete="new-password"
+                        maxLength={100}
+                        placeholder="Min 8 characters"
+                        className={fieldClass("password", "bg-white")}
+                      />
+                      <ErrorText name="password" />
+                    </div>
 
-
-{!isEdit && (
-  <>
-    <div>
-      <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-        Password <span className="text-red-500">*</span>
-      </label>
-
-      <input
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        autoComplete="new-password"
-        maxLength={100}
-        placeholder="Min 8 characters"
-        className={fieldClass("password", "bg-white")}
-      />
-
-      <ErrorText name="password" />
-    </div>
-
-    <div>
-      <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">
-        Confirm Password <span className="text-red-500">*</span>
-      </label>
-
-      <input
-        type="password"
-        name="confirmPassword"
-        value={formData.confirmPassword}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        autoComplete="new-password"
-        maxLength={100}
-        placeholder="Re-enter password"
-        className={fieldClass("confirmPassword", "bg-white")}
-      />
-
-      <ErrorText name="confirmPassword" />
-    </div>
-  </>
-)}
-
-
-
+                    <div>
+                      <label className={labelClass}>
+                        Confirm Password{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        autoComplete="new-password"
+                        maxLength={100}
+                        placeholder="Re-enter password"
+                        className={fieldClass("confirmPassword", "bg-white")}
+                      />
+                      <ErrorText name="confirmPassword" />
+                    </div>
+                  </>
+                )}
               </div>
             </section>
 
-            {/* ============================================================
-                MESSAGES + ACTIONS
-            ============================================================= */}
-            <div className="border-t border-slate-200 pt-5 pb-2">
+            {/* ===== MESSAGES + ACTIONS ===== */}
+            <div className="pt-2 pb-4 md:border-t md:border-slate-200 md:pt-5 md:pb-2">
               {successMessage && (
                 <p className="mb-4 text-center text-emerald-600 font-semibold text-sm">
                   {successMessage}
@@ -1706,12 +1643,12 @@ setTimeout(() => {
                 </p>
               )}
 
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => navigate("/admin/staff-management")}
                   disabled={loading}
-                  className="px-6 py-3 rounded-xl bg-slate-100 text-slate-600 text-sm font-semibold hover:bg-slate-200 disabled:opacity-50 transition"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 text-slate-600 text-sm font-semibold hover:bg-slate-200 disabled:opacity-50 transition"
                 >
                   Cancel
                 </button>
@@ -1719,7 +1656,7 @@ setTimeout(() => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-7 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition disabled:opacity-60"
+                  className="w-full sm:w-auto px-7 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold transition disabled:opacity-60"
                 >
                   {loading
                     ? isEdit
@@ -1735,13 +1672,11 @@ setTimeout(() => {
         </form>
       </div>
 
-      {/* ================================================================
-          CAMERA MODAL
-      ================================================================= */}
+      {/* ================= CAMERA MODAL ================= */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 sm:p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-200">
               <h3 className="font-semibold text-slate-800">
                 Capture Staff Photo
               </h3>
@@ -1755,22 +1690,22 @@ setTimeout(() => {
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                className="w-full rounded-xl bg-black aspect-video object-cover"
+                className="w-full rounded-xl bg-black aspect-[4/3] sm:aspect-video object-cover"
               />
 
               <canvas ref={canvasRef} className="hidden" />
 
-              <div className="flex justify-end gap-3 mt-4">
+              <div className="grid grid-cols-2 sm:flex sm:justify-end gap-3 mt-4">
                 <button
                   type="button"
                   onClick={closeCamera}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium"
+                  className="px-4 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium"
                 >
                   Cancel
                 </button>
@@ -1778,7 +1713,7 @@ setTimeout(() => {
                 <button
                   type="button"
                   onClick={capturePhoto}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
                 >
                   <Camera className="w-4 h-4" />
                   Capture
@@ -1789,9 +1724,7 @@ setTimeout(() => {
         </div>
       )}
 
-      {/* ================================================================
-          LARGE PHOTO PREVIEW MODAL
-      ================================================================= */}
+      {/* ================= LARGE PHOTO MODAL ================= */}
       {showPhotoModal && photoPreview && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4"

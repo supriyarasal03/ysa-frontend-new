@@ -15,6 +15,74 @@ import {
 
 import AddInventory from "./AddInventory";
 
+// ==========================================================
+// SMALL PRESENTATION HELPERS (no business logic)
+// ==========================================================
+
+const formatINR = (value) =>
+  Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const formatDateTime = (value) =>
+  value
+    ? new Date(value).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "-";
+
+const ErrorText = ({ error }) => {
+  if (!error) {
+    return null;
+  }
+
+  return (
+    <p className="mt-1.5 text-xs font-medium text-red-600">
+      {error}
+    </p>
+  );
+};
+
+const StockBadge = ({ item }) => (
+  <span
+    className={`inline-flex min-w-[45px] justify-center rounded-full px-3 py-1.5 text-sm font-bold ${
+      item.stockStatus === "OUT_OF_STOCK"
+        ? "bg-[#ffe5e8] text-[#dd2946]"
+        : item.stockStatus === "LOW_STOCK"
+        ? "bg-[#fff2df] text-[#d67b00]"
+        : "bg-[#e8f9f0] text-[#0a9a5b]"
+    }`}
+  >
+    {item.currentStock}
+  </span>
+);
+
+const StatusBadge = ({ item }) => (
+  <span
+    className={`inline-flex min-w-[82px] justify-center rounded-full px-3 py-1.5 text-xs font-semibold ${
+      item.status === "ACTIVE"
+        ? "bg-[#e7faef] text-[#069a5a]"
+        : "bg-[#ffe8eb] text-[#d72d45]"
+    }`}
+  >
+    {item.status === "ACTIVE" ? "Active" : "Inactive"}
+  </span>
+);
+
+const selectClass =
+  "h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[15px] text-[#344b66] outline-none focus:border-[#0787c8] disabled:cursor-not-allowed disabled:bg-[#f3f6f9] disabled:text-[#9aaabd]";
+
+const labelClass =
+  "mb-1.5 block text-sm font-semibold text-[#415d79]";
+
+const outlineBtn =
+  "h-11 rounded-xl border border-[#d5e0eb] bg-white px-5 font-semibold text-[#536b86] transition hover:bg-[#f7fafc]";
+
 const InventoryManagement = () => {
 
   // ==========================================================
@@ -317,97 +385,81 @@ const InventoryManagement = () => {
 
   // ==========================================================
   // SUB ITEM OPTIONS
+  // SPORT MUST BE SELECTED FIRST
   // ==========================================================
-// ==========================================================
-// SUB ITEM OPTIONS
-// SPORT MUST BE SELECTED FIRST
-// ==========================================================
 
-const subItemOptions = useMemo(() => {
+  const subItemOptions = useMemo(() => {
 
-  if (!sportId) {
-    return [];
-  }
+    if (!sportId) {
+      return [];
+    }
 
-  const source =
-    allInventory.filter(
-      (item) =>
-        String(item?.sportId) ===
-        String(sportId)
+    const source =
+      allInventory.filter(
+        (item) =>
+          String(item?.sportId) ===
+          String(sportId)
+      );
+
+    return [
+      ...new Set(
+        source
+          .map(
+            (item) =>
+              item?.subItem
+          )
+          .filter(Boolean)
+      ),
+    ].sort((a, b) =>
+      a.localeCompare(b)
     );
 
-  return [
-    ...new Set(
-      source
-        .map(
-          (item) =>
-            item?.subItem
-        )
-        .filter(Boolean)
-    ),
-  ].sort((a, b) =>
-    a.localeCompare(b)
-  );
-
-}, [
-  allInventory,
-  sportId,
-]);
-
-
-
-
-
-
+  }, [
+    allInventory,
+    sportId,
+  ]);
 
   // ==========================================================
   // BRAND OPTIONS
+  // SPORT + SUB ITEM MUST BE SELECTED FIRST
   // ==========================================================
-// ==========================================================
-// BRAND OPTIONS
-// SPORT + SUB ITEM MUST BE SELECTED FIRST
-// ==========================================================
 
-const brandOptions = useMemo(() => {
+  const brandOptions = useMemo(() => {
 
-  if (!sportId || !subItem) {
-    return [];
-  }
+    if (!sportId || !subItem) {
+      return [];
+    }
 
-  const source =
-    allInventory.filter(
-      (item) =>
-        String(item?.sportId) ===
-          String(sportId) &&
-        String(
-          item?.subItem || ""
-        ).toLowerCase() ===
-          String(subItem)
-            .toLowerCase()
+    const source =
+      allInventory.filter(
+        (item) =>
+          String(item?.sportId) ===
+            String(sportId) &&
+          String(
+            item?.subItem || ""
+          ).toLowerCase() ===
+            String(subItem)
+              .toLowerCase()
+      );
+
+    return [
+      ...new Set(
+        source
+          .map(
+            (item) =>
+              item?.brand
+          )
+          .filter(Boolean)
+      ),
+    ].sort((a, b) =>
+      a.localeCompare(b)
     );
 
-  return [
-    ...new Set(
-      source
-        .map(
-          (item) =>
-            item?.brand
-        )
-        .filter(Boolean)
-    ),
-  ].sort((a, b) =>
-    a.localeCompare(b)
-  );
-
-}, [
-  allInventory,
-  sportId,
-  subItem,
-]);
-
-
-
-
+  }, [
+    allInventory,
+    sportId,
+    subItem,
+  ]);
 
   // ==========================================================
   // DATE HELPER
@@ -465,10 +517,7 @@ const brandOptions = useMemo(() => {
             return false;
           }
 
-          // --------------------------------------------------
           // DAY
-          // --------------------------------------------------
-
           if (
             costDateType ===
             "DAY"
@@ -493,10 +542,7 @@ const brandOptions = useMemo(() => {
             );
           }
 
-          // --------------------------------------------------
           // MONTH
-          // --------------------------------------------------
-
           if (
             costDateType ===
             "MONTH"
@@ -522,10 +568,7 @@ const brandOptions = useMemo(() => {
             );
           }
 
-          // --------------------------------------------------
           // YEAR
-          // --------------------------------------------------
-
           if (
             costDateType ===
             "YEAR"
@@ -541,10 +584,7 @@ const brandOptions = useMemo(() => {
             );
           }
 
-          // --------------------------------------------------
           // CUSTOM RANGE
-          // --------------------------------------------------
-
           if (
             costDateType ===
             "RANGE"
@@ -636,10 +676,6 @@ const brandOptions = useMemo(() => {
         ),
       0
     );
-
-  // ==========================================================
-  // COST SUMMARY
-  // ==========================================================
 
   // ==========================================================
   // SUMMARY
@@ -833,10 +869,7 @@ const brandOptions = useMemo(() => {
       setPageError("");
       setSuccessMessage("");
 
-      // ------------------------------------------------------
       // DO NOT DEACTIVATE WHILE STOCK EXISTS
-      // ------------------------------------------------------
-
       if (
         newStatus ===
           "INACTIVE" &&
@@ -1083,10 +1116,7 @@ const brandOptions = useMemo(() => {
 
       const errors = {};
 
-      // ------------------------------------------------------
       // RECEIVED STOCK
-      // ------------------------------------------------------
-
       if (
         receivedQuantity === "" ||
         receivedQuantity === null
@@ -1117,10 +1147,7 @@ const brandOptions = useMemo(() => {
 
       }
 
-      // ------------------------------------------------------
       // COST PRICE
-      // ------------------------------------------------------
-
       if (
         costPrice === "" ||
         costPrice === null
@@ -1147,10 +1174,7 @@ const brandOptions = useMemo(() => {
 
       }
 
-      // ------------------------------------------------------
       // SELLING PRICE
-      // ------------------------------------------------------
-
       if (
         sellingPrice === "" ||
         sellingPrice === null
@@ -1181,10 +1205,7 @@ const brandOptions = useMemo(() => {
 
       }
 
-      // ------------------------------------------------------
       // LOW STOCK ALERT
-      // ------------------------------------------------------
-
       if (
         lowStockAlert === "" ||
         lowStockAlert === null
@@ -1307,10 +1328,7 @@ const brandOptions = useMemo(() => {
             receivedQuantity
           );
 
-        // ----------------------------------------------------
         // RECEIVE STOCK
-        // ----------------------------------------------------
-
         await receiveStock(
           manageItem.id,
           {
@@ -1329,10 +1347,7 @@ const brandOptions = useMemo(() => {
           }
         );
 
-        // ----------------------------------------------------
         // UPDATE COST / SELLING / LOW STOCK
-        // ----------------------------------------------------
-
         await updateInventory(
           manageItem.id,
           {
@@ -1423,23 +1438,96 @@ const brandOptions = useMemo(() => {
   }
 
   // ==========================================================
-  // ERROR TEXT
+  // SHARED ACTION BUTTONS (table + mobile cards)
   // ==========================================================
 
-  const ErrorText = ({
-    error,
-  }) => {
+  const renderActions = (item, withLabels = false) => (
 
-    if (!error) {
-      return null;
-    }
+    <div
+      className={
+        withLabels
+          ? "grid grid-cols-3 gap-2"
+          : "flex items-center gap-1"
+      }
+    >
 
-    return (
-      <p className="mt-1.5 text-xs font-medium text-red-600">
-        {error}
-      </p>
-    );
-  };
+      {/* VIEW */}
+
+      <button
+        type="button"
+        title="View"
+        onClick={() =>
+          setViewItem(item)
+        }
+        className={
+          withLabels
+            ? "flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[#d5e0eb] bg-white text-sm font-semibold text-[#536b86] transition active:bg-[#eef6fb]"
+            : "flex h-9 w-9 items-center justify-center rounded-lg text-[#8aa1bb] transition hover:bg-[#eef6fb] hover:text-[#0787c8]"
+        }
+      >
+        <span>👁</span>
+        {withLabels && <span>View</span>}
+      </button>
+
+      {/* MANAGE */}
+
+      <button
+        type="button"
+        title="Manage Stock & Price"
+        onClick={() =>
+          handleOpenManage(item)
+        }
+        disabled={
+          item.status !== "ACTIVE"
+        }
+        className={
+          withLabels
+            ? "flex h-11 items-center justify-center gap-1.5 rounded-xl border border-[#d5e0eb] bg-white text-sm font-semibold text-[#536b86] transition active:bg-[#eef6fb] disabled:cursor-not-allowed disabled:opacity-40"
+            : "flex h-9 w-9 items-center justify-center rounded-lg text-[#8aa1bb] transition hover:bg-[#eef6fb] hover:text-[#0787c8] disabled:cursor-not-allowed disabled:opacity-40"
+        }
+      >
+        <span>✎</span>
+        {withLabels && <span>Manage</span>}
+      </button>
+
+      {/* ACTIVATE / DEACTIVATE */}
+
+      <button
+        type="button"
+        title={
+          item.status === "ACTIVE"
+            ? "Deactivate"
+            : "Activate"
+        }
+        onClick={() =>
+          handleStatusChange(item)
+        }
+        className={
+          withLabels
+            ? `flex h-11 items-center justify-center gap-1.5 rounded-xl border text-sm font-semibold transition ${
+                item.status === "ACTIVE"
+                  ? "border-red-100 bg-red-50 text-red-500"
+                  : "border-green-100 bg-green-50 text-green-600"
+              }`
+            : `flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                item.status === "ACTIVE"
+                  ? "text-[#8aa1bb] hover:bg-red-50 hover:text-red-500"
+                  : "text-[#8aa1bb] hover:bg-green-50 hover:text-green-600"
+              }`
+        }
+      >
+        <span>⏻</span>
+        {withLabels && (
+          <span>
+            {item.status === "ACTIVE"
+              ? "Disable"
+              : "Enable"}
+          </span>
+        )}
+      </button>
+
+    </div>
+  );
 
   // ==========================================================
   // MAIN UI
@@ -1447,21 +1535,21 @@ const brandOptions = useMemo(() => {
 
   return (
 
-    <div className="min-h-screen bg-[#f3f7fb] px-6 py-7 lg:px-10">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#f3f7fb] px-3 py-5 sm:px-6 sm:py-7 lg:px-10">
 
       {/* ====================================================
           HEADER
       ==================================================== */}
 
-      <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-start">
+      <div className="mb-5 flex flex-col justify-between gap-4 sm:mb-7 md:flex-row md:items-start">
 
         <div>
 
-          <h1 className="text-3xl font-bold text-[#172b4d]">
+          <h1 className="text-2xl font-bold text-[#172b4d] sm:text-3xl">
             Inventory Management
           </h1>
 
-          <p className="mt-2 text-[16px] text-[#66809f]">
+          <p className="mt-1.5 text-sm text-[#66809f] sm:mt-2 sm:text-[16px]">
             Manage all sports inventory of
             Yashree Sports Academy
           </p>
@@ -1480,7 +1568,7 @@ const brandOptions = useMemo(() => {
             );
 
           }}
-          className="flex h-12 min-w-[220px] items-center justify-center rounded-[14px] bg-[#0787c8] px-6 text-[16px] font-semibold text-white shadow-md transition hover:bg-[#0678b3]"
+          className="flex h-12 w-full items-center justify-center rounded-[14px] bg-[#0787c8] px-6 text-[16px] font-semibold text-white shadow-md transition hover:bg-[#0678b3] md:w-auto md:min-w-[220px]"
         >
 
           <span className="mr-2 text-xl">
@@ -1499,7 +1587,7 @@ const brandOptions = useMemo(() => {
 
       {successMessage && (
 
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 font-medium text-green-700">
+        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 sm:mb-5 sm:text-base">
 
           {successMessage}
 
@@ -1513,7 +1601,7 @@ const brandOptions = useMemo(() => {
 
       {pageError && (
 
-        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-medium text-red-600">
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 sm:mb-5 sm:text-base">
 
           {pageError}
 
@@ -1525,23 +1613,23 @@ const brandOptions = useMemo(() => {
           SUMMARY CARDS
       ==================================================== */}
 
-      <div className="mb-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-7 sm:gap-5 xl:grid-cols-4">
 
         {/* TOTAL ITEMS */}
 
-        <div className="flex min-h-[155px] items-center gap-5 rounded-[18px] border border-[#dce5ed] bg-white p-7 shadow-sm">
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#dce5ed] bg-white p-4 shadow-sm sm:min-h-[130px] sm:flex-row sm:items-center sm:gap-5 sm:p-6 lg:min-h-[155px] lg:p-7">
 
-          <div className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[15px] bg-[#dff2ff] text-2xl text-[#0787c8]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-[#dff2ff] text-xl text-[#0787c8] sm:h-[58px] sm:w-[58px] sm:rounded-[15px] sm:text-2xl">
             📦
           </div>
 
           <div>
 
-            <p className="mb-2 text-[15px] text-[#66809f]">
+            <p className="mb-1 text-[13px] text-[#66809f] sm:mb-2 sm:text-[15px]">
               Total Items
             </p>
 
-            <h2 className="text-3xl font-bold text-[#172b4d]">
+            <h2 className="text-2xl font-bold text-[#172b4d] sm:text-3xl">
               {totalItems}
             </h2>
 
@@ -1551,19 +1639,19 @@ const brandOptions = useMemo(() => {
 
         {/* TOTAL STOCK */}
 
-        <div className="flex min-h-[155px] items-center gap-5 rounded-[18px] border border-[#dce5ed] bg-white p-7 shadow-sm">
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#dce5ed] bg-white p-4 shadow-sm sm:min-h-[130px] sm:flex-row sm:items-center sm:gap-5 sm:p-6 lg:min-h-[155px] lg:p-7">
 
-          <div className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[15px] bg-[#d9f8e9] text-2xl text-[#0aa968]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-[#d9f8e9] text-xl text-[#0aa968] sm:h-[58px] sm:w-[58px] sm:rounded-[15px] sm:text-2xl">
             📊
           </div>
 
           <div>
 
-            <p className="mb-2 text-[15px] text-[#66809f]">
+            <p className="mb-1 text-[13px] text-[#66809f] sm:mb-2 sm:text-[15px]">
               Total Stock
             </p>
 
-            <h2 className="text-3xl font-bold text-[#172b4d]">
+            <h2 className="text-2xl font-bold text-[#172b4d] sm:text-3xl">
               {totalStock}
             </h2>
 
@@ -1573,19 +1661,19 @@ const brandOptions = useMemo(() => {
 
         {/* LOW STOCK */}
 
-        <div className="flex min-h-[155px] items-center gap-5 rounded-[18px] border border-[#dce5ed] bg-white p-7 shadow-sm">
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#dce5ed] bg-white p-4 shadow-sm sm:min-h-[130px] sm:flex-row sm:items-center sm:gap-5 sm:p-6 lg:min-h-[155px] lg:p-7">
 
-          <div className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[15px] bg-[#fff1dc] text-2xl text-[#e68a00]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-[#fff1dc] text-xl text-[#e68a00] sm:h-[58px] sm:w-[58px] sm:rounded-[15px] sm:text-2xl">
             ⚠
           </div>
 
           <div>
 
-            <p className="mb-2 text-[15px] text-[#66809f]">
+            <p className="mb-1 text-[13px] text-[#66809f] sm:mb-2 sm:text-[15px]">
               Low Stock
             </p>
 
-            <h2 className="text-3xl font-bold text-[#172b4d]">
+            <h2 className="text-2xl font-bold text-[#172b4d] sm:text-3xl">
               {lowStock}
             </h2>
 
@@ -1595,19 +1683,19 @@ const brandOptions = useMemo(() => {
 
         {/* OUT OF STOCK */}
 
-        <div className="flex min-h-[155px] items-center gap-5 rounded-[18px] border border-[#dce5ed] bg-white p-7 shadow-sm">
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-[#dce5ed] bg-white p-4 shadow-sm sm:min-h-[130px] sm:flex-row sm:items-center sm:gap-5 sm:p-6 lg:min-h-[155px] lg:p-7">
 
-          <div className="flex h-[58px] w-[58px] items-center justify-center rounded-[15px] bg-[#ffe1e5] text-2xl text-[#ed2847]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px] bg-[#ffe1e5] text-xl text-[#ed2847] sm:h-[58px] sm:w-[58px] sm:rounded-[15px] sm:text-2xl">
             ×
           </div>
 
           <div>
 
-            <p className="mb-2 text-[15px] text-[#66809f]">
+            <p className="mb-1 text-[13px] text-[#66809f] sm:mb-2 sm:text-[15px]">
               Out of Stock
             </p>
 
-            <h2 className="text-3xl font-bold text-[#172b4d]">
+            <h2 className="text-2xl font-bold text-[#172b4d] sm:text-3xl">
               {outOfStock}
             </h2>
 
@@ -1621,17 +1709,17 @@ const brandOptions = useMemo(() => {
           TABLE CARD
       ==================================================== */}
 
-      <div className="overflow-hidden rounded-[18px] border border-[#dce5ed] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[#dce5ed] bg-white shadow-sm">
 
         {/* ==================================================
             VIEW / FILTERS
         ================================================== */}
 
-        <div className="border-b border-[#e7edf3] p-7">
+        <div className="border-b border-[#e7edf3] p-4 sm:p-7">
 
           {/* VIEW SELECTOR */}
 
-          <div className="mb-7 rounded-[16px] border border-[#dce5ed] bg-[#f8fafc] p-5">
+          <div className="mb-5 rounded-2xl border border-[#dce5ed] bg-[#f8fafc] p-4 sm:mb-7 sm:p-5">
 
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 
@@ -1649,7 +1737,7 @@ const brandOptions = useMemo(() => {
 
               <div className="w-full md:w-[300px]">
 
-                <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                <label className={labelClass}>
                   View
                 </label>
 
@@ -1660,7 +1748,7 @@ const brandOptions = useMemo(() => {
                       event.target.value
                     )
                   }
-                  className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                  className={selectClass}
                 >
 
                   <option value="INVENTORY">
@@ -1687,7 +1775,7 @@ const brandOptions = useMemo(() => {
 
             <>
 
-              <div className="mb-5">
+              <div className="mb-4 sm:mb-5">
 
                 <h2 className="text-lg font-bold text-[#172b4d]">
                   Inventory Items
@@ -1700,13 +1788,13 @@ const brandOptions = useMemo(() => {
 
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
 
                 {/* SPORT */}
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                  <label className={labelClass}>
                     Sport
                   </label>
 
@@ -1722,7 +1810,7 @@ const brandOptions = useMemo(() => {
                       setBrand("");
 
                     }}
-                    className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                    className={selectClass}
                   >
 
                     <option value="">
@@ -1750,52 +1838,45 @@ const brandOptions = useMemo(() => {
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                  <label className={labelClass}>
                     Sub Item
                   </label>
 
+                  <select
+                    value={subItem}
+                    disabled={!sportId}
+                    onChange={(event) => {
 
+                      const value =
+                        event.target.value;
 
-<select
-  value={subItem}
-  disabled={!sportId}
-  onChange={(event) => {
+                      setSubItem(value);
+                      setBrand("");
 
-    const value =
-      event.target.value;
+                    }}
+                    className={selectClass}
+                  >
 
-    setSubItem(value);
-    setBrand("");
+                    <option value="">
+                      {sportId
+                        ? "All Sub Items"
+                        : "Select Sport First"}
+                    </option>
 
-  }}
-  className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8] disabled:cursor-not-allowed disabled:bg-[#f3f6f9] disabled:text-[#9aaabd]"
->
+                    {subItemOptions.map(
+                      (item) => (
 
-  <option value="">
-    {sportId
-      ? "All Sub Items"
-      : "Select Sport First"}
-  </option>
+                        <option
+                          key={item}
+                          value={item}
+                        >
+                          {item}
+                        </option>
 
-  {subItemOptions.map(
-    (item) => (
+                      )
+                    )}
 
-      <option
-        key={item}
-        value={item}
-      >
-        {item}
-      </option>
-
-    )
-  )}
-
-</select>
-
-
-
-
-
+                  </select>
 
                 </div>
 
@@ -1803,62 +1884,43 @@ const brandOptions = useMemo(() => {
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                  <label className={labelClass}>
                     Brand
                   </label>
 
+                  <select
+                    value={brand}
+                    disabled={!sportId || !subItem}
+                    onChange={(event) =>
+                      setBrand(
+                        event.target.value
+                      )
+                    }
+                    className={selectClass}
+                  >
 
+                    <option value="">
+                      {!sportId
+                        ? "Select Sport First"
+                        : !subItem
+                        ? "Select Sub Item First"
+                        : "All Brands"}
+                    </option>
 
+                    {brandOptions.map(
+                      (item) => (
 
+                        <option
+                          key={item}
+                          value={item}
+                        >
+                          {item}
+                        </option>
 
+                      )
+                    )}
 
-
-
-
-
-
-
-
-<select
-  value={brand}
-  disabled={!sportId || !subItem}
-  onChange={(event) =>
-    setBrand(
-      event.target.value
-    )
-  }
-  className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8] disabled:cursor-not-allowed disabled:bg-[#f3f6f9] disabled:text-[#9aaabd]"
->
-
-  <option value="">
-    {!sportId
-      ? "Select Sport First"
-      : !subItem
-      ? "Select Sub Item First"
-      : "All Brands"}
-  </option>
-
-  {brandOptions.map(
-    (item) => (
-
-      <option
-        key={item}
-        value={item}
-      >
-        {item}
-      </option>
-
-    )
-  )}
-
-</select>
-
-
-
-
-
-
-
+                  </select>
 
                 </div>
 
@@ -1866,7 +1928,7 @@ const brandOptions = useMemo(() => {
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                  <label className={labelClass}>
                     Status
                   </label>
 
@@ -1877,7 +1939,7 @@ const brandOptions = useMemo(() => {
                         event.target.value
                       )
                     }
-                    className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                    className={selectClass}
                   >
 
                     <option value="">
@@ -1898,12 +1960,12 @@ const brandOptions = useMemo(() => {
 
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex sm:justify-end">
 
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="h-11 rounded-xl border border-[#d5e0eb] bg-white px-5 font-semibold text-[#536b86] transition hover:bg-[#f7fafc]"
+                  className={`${outlineBtn} w-full sm:w-auto`}
                 >
                   Clear Filters
                 </button>
@@ -1922,7 +1984,7 @@ const brandOptions = useMemo(() => {
 
             <>
 
-              <div className="mb-5">
+              <div className="mb-4 sm:mb-5">
 
                 <h2 className="text-lg font-bold text-[#172b4d]">
                   Cost Price Filter
@@ -1935,13 +1997,13 @@ const brandOptions = useMemo(() => {
 
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4">
 
                 {/* PERIOD */}
 
                 <div>
 
-                  <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                  <label className={labelClass}>
                     Period
                   </label>
 
@@ -1960,7 +2022,7 @@ const brandOptions = useMemo(() => {
                       setCostToDate("");
 
                     }}
-                    className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                    className={selectClass}
                   >
 
                     <option value="ALL">
@@ -1994,7 +2056,7 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                    <label className={labelClass}>
                       Select Date
                     </label>
 
@@ -2006,7 +2068,7 @@ const brandOptions = useMemo(() => {
                           event.target.value
                         )
                       }
-                      className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                      className={selectClass}
                     />
 
                   </div>
@@ -2020,7 +2082,7 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                    <label className={labelClass}>
                       Select Month
                     </label>
 
@@ -2032,7 +2094,7 @@ const brandOptions = useMemo(() => {
                           event.target.value
                         )
                       }
-                      className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                      className={selectClass}
                     />
 
                   </div>
@@ -2046,7 +2108,7 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                    <label className={labelClass}>
                       Select Year
                     </label>
 
@@ -2061,7 +2123,7 @@ const brandOptions = useMemo(() => {
                           event.target.value
                         )
                       }
-                      className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                      className={selectClass}
                     />
 
                   </div>
@@ -2075,7 +2137,7 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                    <label className={labelClass}>
                       From Date
                     </label>
 
@@ -2087,7 +2149,7 @@ const brandOptions = useMemo(() => {
                           event.target.value
                         )
                       }
-                      className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                      className={selectClass}
                     />
 
                   </div>
@@ -2101,7 +2163,7 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <label className="mb-2 block text-sm font-semibold text-[#415d79]">
+                    <label className={labelClass}>
                       To Date
                     </label>
 
@@ -2117,7 +2179,7 @@ const brandOptions = useMemo(() => {
                           event.target.value
                         )
                       }
-                      className="h-12 w-full rounded-xl border border-[#d5e0eb] bg-white px-4 text-[#344b66] outline-none focus:border-[#0787c8]"
+                      className={selectClass}
                     />
 
                   </div>
@@ -2126,14 +2188,14 @@ const brandOptions = useMemo(() => {
 
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex sm:justify-end">
 
                 <button
                   type="button"
                   onClick={
                     clearCostFilters
                   }
-                  className="h-11 rounded-xl border border-[#d5e0eb] bg-white px-5 font-semibold text-[#536b86] transition hover:bg-[#f7fafc]"
+                  className={`${outlineBtn} w-full sm:w-auto`}
                 >
                   Clear Cost Filter
                 </button>
@@ -2152,9 +2214,9 @@ const brandOptions = useMemo(() => {
 
         {viewMode === "COST" && (
 
-          <div className="border-b border-[#e7edf3] bg-white p-7">
+          <div className="border-b border-[#e7edf3] bg-white p-4 sm:p-7">
 
-            <div className="mb-5">
+            <div className="mb-4 sm:mb-5">
 
               <h2 className="text-lg font-bold text-[#172b4d]">
                 Cost Summary
@@ -2168,24 +2230,17 @@ const brandOptions = useMemo(() => {
 
             {/* TOTAL COST */}
 
-            <div className="flex justify-end">
+            <div className="flex sm:justify-end">
 
-              <div className="min-w-[260px] rounded-[16px] border border-[#ccebdc] bg-[#f0fbf5] px-7 py-5 text-right">
+              <div className="w-full rounded-2xl border border-[#ccebdc] bg-[#f0fbf5] px-5 py-4 sm:w-auto sm:min-w-[260px] sm:px-7 sm:py-5 sm:text-right">
 
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#5f8973]">
                   Total Cost
                 </p>
 
-                <p className="mt-1 text-2xl font-bold text-[#078a54]">
+                <p className="mt-1 break-all text-2xl font-bold text-[#078a54]">
 
-                  ₹
-                  {totalCost.toLocaleString(
-                    "en-IN",
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}
+                  ₹{formatINR(totalCost)}
 
                 </p>
 
@@ -2198,10 +2253,128 @@ const brandOptions = useMemo(() => {
         )}
 
         {/* ==================================================
-            TABLE
+            MOBILE LIST (cards) — shown below md
         ================================================== */}
 
-        <div className="overflow-x-auto">
+        <div className="md:hidden">
+
+          {loading ? (
+
+            <div className="px-5 py-12 text-center text-[#8195aa]">
+              Loading inventory...
+            </div>
+
+          ) : searchLoading ? (
+
+            <div className="px-5 py-12 text-center text-[#8195aa]">
+              Searching inventory...
+            </div>
+
+          ) : costFilteredInventory.length ===
+            0 ? (
+
+            <div className="px-5 py-12 text-center text-[#8195aa]">
+              No inventory found.
+            </div>
+
+          ) : (
+
+            <ul className="divide-y divide-[#edf1f5]">
+
+              {paginatedInventory.map(
+                (item) => (
+
+                  <li
+                    key={item.id}
+                    className="p-4"
+                  >
+
+                    {/* TOP: names + status */}
+
+                    <div className="flex items-start justify-between gap-3">
+
+                      <div className="min-w-0">
+
+                        <p className="truncate text-[12px] font-medium text-[#7b90a7]">
+                          {item.sportName}
+                        </p>
+
+                        <h3 className="mt-0.5 break-words text-base font-semibold text-[#172b4d]">
+                          {item.subItem}
+                        </h3>
+
+                        <p className="mt-0.5 break-words text-sm text-[#324b67]">
+                          {item.brand}
+                        </p>
+
+                      </div>
+
+                      <StatusBadge item={item} />
+
+                    </div>
+
+                    {/* PRICES + STOCK */}
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-[#f7f9fc] p-3">
+
+                      <div>
+
+                        <p className="text-[11px] text-[#8a9db1]">
+                          Cost
+                        </p>
+
+                        <p className="mt-0.5 break-words text-[13px] font-semibold text-[#183654]">
+                          ₹{formatINR(item.costPrice)}
+                        </p>
+
+                      </div>
+
+                      <div>
+
+                        <p className="text-[11px] text-[#8a9db1]">
+                          Selling
+                        </p>
+
+                        <p className="mt-0.5 break-words text-[13px] font-semibold text-[#183654]">
+                          ₹{formatINR(item.sellingPrice)}
+                        </p>
+
+                      </div>
+
+                      <div>
+
+                        <p className="mb-0.5 text-[11px] text-[#8a9db1]">
+                          Stock
+                        </p>
+
+                        <StockBadge item={item} />
+
+                      </div>
+
+                    </div>
+
+                    {/* ACTIONS */}
+
+                    <div className="mt-3">
+                      {renderActions(item, true)}
+                    </div>
+
+                  </li>
+
+                )
+              )}
+
+            </ul>
+
+          )}
+
+        </div>
+
+        {/* ==================================================
+            TABLE — shown from md up
+        ================================================== */}
+
+        <div className="hidden overflow-x-auto md:block">
 
           <table className="w-full border-collapse">
 
@@ -2299,184 +2472,38 @@ const brandOptions = useMemo(() => {
                       className="border-t border-[#edf1f5] hover:bg-[#fbfdff]"
                     >
 
-                      {/* SPORT */}
-
                       <td className="px-5 py-5 text-sm text-[#324b67]">
                         {item.sportName}
                       </td>
-
-                      {/* SUB ITEM */}
 
                       <td className="px-5 py-5 text-sm font-semibold text-[#172b4d]">
                         {item.subItem}
                       </td>
 
-                      {/* BRAND */}
-
                       <td className="px-5 py-5 text-sm text-[#324b67]">
                         {item.brand}
                       </td>
 
-                      {/* COST PRICE */}
-
-                      <td className="px-5 py-5 text-sm text-[#324b67]">
-
-                        ₹
-                        {Number(
-                          item.costPrice ||
-                            0
-                        ).toLocaleString(
-                          "en-IN",
-                          {
-                            minimumFractionDigits:
-                              2,
-                            maximumFractionDigits:
-                              2,
-                          }
-                        )}
-
+                      <td className="whitespace-nowrap px-5 py-5 text-sm text-[#324b67]">
+                        ₹{formatINR(item.costPrice)}
                       </td>
 
-                      {/* SELLING PRICE */}
-
-                      <td className="px-5 py-5 text-sm text-[#324b67]">
-
-                        ₹
-                        {Number(
-                          item.sellingPrice ||
-                            0
-                        ).toLocaleString(
-                          "en-IN",
-                          {
-                            minimumFractionDigits:
-                              2,
-                            maximumFractionDigits:
-                              2,
-                          }
-                        )}
-
+                      <td className="whitespace-nowrap px-5 py-5 text-sm text-[#324b67]">
+                        ₹{formatINR(item.sellingPrice)}
                       </td>
-
-                      {/* STOCK */}
 
                       <td className="px-5 py-5">
-
-                        <span
-                          className={`inline-flex min-w-[45px] justify-center rounded-full px-3 py-1.5 text-sm font-bold ${
-                            item.stockStatus ===
-                            "OUT_OF_STOCK"
-
-                              ? "bg-[#ffe5e8] text-[#dd2946]"
-
-                              : item.stockStatus ===
-                                "LOW_STOCK"
-
-                              ? "bg-[#fff2df] text-[#d67b00]"
-
-                              : "bg-[#e8f9f0] text-[#0a9a5b]"
-                          }`}
-                        >
-
-                          {item.currentStock}
-
-                        </span>
-
+                        <StockBadge item={item} />
                       </td>
 
-                      {/* STATUS */}
-
                       <td className="px-5 py-5">
-
-                        <span
-                          className={`inline-flex min-w-[82px] justify-center rounded-full px-3 py-2 text-xs font-semibold ${
-                            item.status ===
-                            "ACTIVE"
-
-                              ? "bg-[#e7faef] text-[#069a5a]"
-
-                              : "bg-[#ffe8eb] text-[#d72d45]"
-                          }`}
-                        >
-
-                          {item.status ===
-                          "ACTIVE"
-                            ? "Active"
-                            : "Inactive"}
-
-                        </span>
-
+                        <StatusBadge item={item} />
                       </td>
 
-                      {/* ==================================================
-                          ACTIONS
-                          DO NOT REMOVE
-                      ================================================== */}
+                      {/* ACTIONS — DO NOT REMOVE */}
 
                       <td className="px-5 py-5">
-
-                        <div className="flex items-center gap-1">
-
-                          {/* VIEW */}
-
-                          <button
-                            type="button"
-                            title="View"
-                            onClick={() =>
-                              setViewItem(
-                                item
-                              )
-                            }
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#8aa1bb] transition hover:bg-[#eef6fb] hover:text-[#0787c8]"
-                          >
-                            👁
-                          </button>
-
-                          {/* MANAGE */}
-
-                          <button
-                            type="button"
-                            title="Manage Stock & Price"
-                            onClick={() =>
-                              handleOpenManage(
-                                item
-                              )
-                            }
-                            disabled={
-                              item.status !==
-                              "ACTIVE"
-                            }
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#8aa1bb] transition hover:bg-[#eef6fb] hover:text-[#0787c8] disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            ✎
-                          </button>
-
-                          {/* ACTIVATE / DEACTIVATE */}
-
-                          <button
-                            type="button"
-                            title={
-                              item.status ===
-                              "ACTIVE"
-                                ? "Deactivate"
-                                : "Activate"
-                            }
-                            onClick={() =>
-                              handleStatusChange(
-                                item
-                              )
-                            }
-                            className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
-                              item.status ===
-                              "ACTIVE"
-                                ? "text-[#8aa1bb] hover:bg-red-50 hover:text-red-500"
-                                : "text-[#8aa1bb] hover:bg-green-50 hover:text-green-600"
-                            }`}
-                          >
-                            ⏻
-                          </button>
-
-                        </div>
-
+                        {renderActions(item)}
                       </td>
 
                     </tr>
@@ -2500,9 +2527,9 @@ const brandOptions = useMemo(() => {
           costFilteredInventory.length >
             0 && (
 
-            <div className="flex flex-col gap-3 border-t border-[#e7edf3] bg-white px-7 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-[#e7edf3] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
 
-              <p className="text-sm text-[#7187a0]">
+              <p className="text-center text-sm text-[#7187a0] sm:text-left">
 
                 Showing{" "}
 
@@ -2528,7 +2555,7 @@ const brandOptions = useMemo(() => {
 
               </p>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between gap-2 sm:justify-end">
 
                 <button
                   type="button"
@@ -2545,12 +2572,12 @@ const brandOptions = useMemo(() => {
                         )
                     )
                   }
-                  className="rounded-lg border border-[#d5e0eb] bg-white px-4 py-2 text-sm font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-10 rounded-lg border border-[#d5e0eb] bg-white px-4 text-sm font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Previous
                 </button>
 
-                <span className="rounded-lg bg-[#eef8ff] px-4 py-2 text-sm font-semibold text-[#0787c8]">
+                <span className="whitespace-nowrap rounded-lg bg-[#eef8ff] px-3 py-2 text-sm font-semibold text-[#0787c8] sm:px-4">
                   Page {currentPage} of {totalPages}
                 </span>
 
@@ -2569,7 +2596,7 @@ const brandOptions = useMemo(() => {
                         )
                     )
                   }
-                  className="rounded-lg border border-[#d5e0eb] bg-white px-4 py-2 text-sm font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-10 rounded-lg border border-[#d5e0eb] bg-white px-4 text-sm font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -2588,21 +2615,21 @@ const brandOptions = useMemo(() => {
 
       {viewItem && (
 
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/50 sm:items-center sm:p-4">
 
-          <div className="relative flex max-h-[92vh] w-full max-w-[960px] flex-col overflow-hidden rounded-[18px] bg-white shadow-2xl">
+          <div className="relative flex max-h-[92vh] w-full max-w-[960px] flex-col overflow-hidden rounded-t-[20px] bg-white shadow-2xl sm:rounded-[18px]">
 
             {/* HEADER */}
 
-            <div className="flex shrink-0 items-center justify-between bg-[#0f172a] px-7 py-6">
+            <div className="flex shrink-0 items-center justify-between bg-[#0f172a] px-5 py-4 sm:px-7 sm:py-6">
 
               <div>
 
-                <h2 className="text-[22px] font-bold text-white">
+                <h2 className="text-lg font-bold text-white sm:text-[22px]">
                   Inventory Details
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-300">
+                <p className="mt-0.5 text-xs text-slate-300 sm:mt-1 sm:text-sm">
                   View complete inventory information
                 </p>
 
@@ -2613,7 +2640,7 @@ const brandOptions = useMemo(() => {
                 onClick={() =>
                   setViewItem(null)
                 }
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-2xl text-white transition hover:bg-white/10"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-2xl text-white transition hover:bg-white/10"
               >
                 ×
               </button>
@@ -2622,25 +2649,25 @@ const brandOptions = useMemo(() => {
 
             {/* BODY */}
 
-            <div className="overflow-y-auto px-7 py-7">
+            <div className="overflow-y-auto px-4 py-5 sm:px-7 sm:py-7">
 
               {/* INVENTORY INFORMATION */}
 
-              <div className="mb-7 rounded-[15px] border border-[#dce5ed] bg-white">
+              <div className="mb-5 rounded-[15px] border border-[#dce5ed] bg-white sm:mb-7">
 
-                <div className="flex items-center gap-4 border-b border-[#e7edf3] px-7 py-6">
+                <div className="flex items-center gap-3 border-b border-[#e7edf3] px-4 py-4 sm:gap-4 sm:px-7 sm:py-6">
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e7f5ff] text-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e7f5ff] text-lg sm:h-11 sm:w-11 sm:text-xl">
                     📦
                   </div>
 
                   <div>
 
-                    <h3 className="text-[17px] font-semibold text-[#17385c]">
+                    <h3 className="text-[15px] font-semibold text-[#17385c] sm:text-[17px]">
                       INVENTORY INFORMATION
                     </h3>
 
-                    <p className="mt-1 text-sm text-[#8295aa]">
+                    <p className="mt-0.5 text-xs text-[#8295aa] sm:mt-1 sm:text-sm">
                       Basic details of this inventory item.
                     </p>
 
@@ -2648,15 +2675,15 @@ const brandOptions = useMemo(() => {
 
                 </div>
 
-                <div className="grid grid-cols-1 gap-x-12 gap-y-7 px-7 py-7 md:grid-cols-2">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-5 px-4 py-5 sm:gap-x-12 sm:gap-y-7 sm:px-7 sm:py-7">
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Sport
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
+                    <p className="break-words text-[15px] font-medium text-[#183654] sm:text-[16px]">
                       {viewItem.sportName ||
                         "-"}
                     </p>
@@ -2665,11 +2692,11 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Sub Item
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
+                    <p className="break-words text-[15px] font-medium text-[#183654] sm:text-[16px]">
                       {viewItem.subItem ||
                         "-"}
                     </p>
@@ -2678,11 +2705,11 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Brand
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
+                    <p className="break-words text-[15px] font-medium text-[#183654] sm:text-[16px]">
                       {viewItem.brand ||
                         "-"}
                     </p>
@@ -2691,12 +2718,12 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Status
                     </p>
 
                     <span
-                      className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
+                      className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm ${
                         viewItem.status ===
                         "ACTIVE"
                           ? "bg-[#e6f9ef] text-[#079657]"
@@ -2717,21 +2744,21 @@ const brandOptions = useMemo(() => {
 
               {/* PRICING & STOCK */}
 
-              <div className="mb-7 rounded-[15px] border border-[#dce5ed] bg-white">
+              <div className="mb-5 rounded-[15px] border border-[#dce5ed] bg-white sm:mb-7">
 
-                <div className="flex items-center gap-4 border-b border-[#e7edf3] px-7 py-6">
+                <div className="flex items-center gap-3 border-b border-[#e7edf3] px-4 py-4 sm:gap-4 sm:px-7 sm:py-6">
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e7f8ef] text-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e7f8ef] text-lg sm:h-11 sm:w-11 sm:text-xl">
                     💰
                   </div>
 
                   <div>
 
-                    <h3 className="text-[17px] font-semibold text-[#17385c]">
+                    <h3 className="text-[15px] font-semibold text-[#17385c] sm:text-[17px]">
                       PRICING & STOCK
                     </h3>
 
-                    <p className="mt-1 text-sm text-[#8295aa]">
+                    <p className="mt-0.5 text-xs text-[#8295aa] sm:mt-1 sm:text-sm">
                       Current pricing and stock information.
                     </p>
 
@@ -2739,32 +2766,18 @@ const brandOptions = useMemo(() => {
 
                 </div>
 
-                <div className="grid grid-cols-1 gap-x-12 gap-y-7 px-7 py-7 md:grid-cols-2">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-5 px-4 py-5 sm:gap-x-12 sm:gap-y-7 sm:px-7 sm:py-7">
 
                   {/* COST */}
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Cost Price
                     </p>
 
-                    <p className="text-[17px] font-semibold text-[#183654]">
-
-                      ₹
-                      {Number(
-                        viewItem.costPrice ||
-                          0
-                      ).toLocaleString(
-                        "en-IN",
-                        {
-                          minimumFractionDigits:
-                            2,
-                          maximumFractionDigits:
-                            2,
-                        }
-                      )}
-
+                    <p className="break-words text-[16px] font-semibold text-[#183654] sm:text-[17px]">
+                      ₹{formatINR(viewItem.costPrice)}
                     </p>
 
                   </div>
@@ -2773,26 +2786,12 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Selling Price
                     </p>
 
-                    <p className="text-[17px] font-semibold text-[#183654]">
-
-                      ₹
-                      {Number(
-                        viewItem.sellingPrice ||
-                          0
-                      ).toLocaleString(
-                        "en-IN",
-                        {
-                          minimumFractionDigits:
-                            2,
-                          maximumFractionDigits:
-                            2,
-                        }
-                      )}
-
+                    <p className="break-words text-[16px] font-semibold text-[#183654] sm:text-[17px]">
+                      ₹{formatINR(viewItem.sellingPrice)}
                     </p>
 
                   </div>
@@ -2801,11 +2800,11 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Current Stock
                     </p>
 
-                    <p className="text-[17px] font-semibold text-[#183654]">
+                    <p className="text-[16px] font-semibold text-[#183654] sm:text-[17px]">
                       {viewItem.currentStock ??
                         0}
                     </p>
@@ -2816,11 +2815,11 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Low Stock Alert
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
+                    <p className="text-[15px] font-medium text-[#183654] sm:text-[16px]">
                       {viewItem.lowStockAlert ??
                         0}
                     </p>
@@ -2831,12 +2830,12 @@ const brandOptions = useMemo(() => {
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Stock Status
                     </p>
 
                     <span
-                      className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
+                      className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm ${
                         viewItem.stockStatus ===
                         "OUT_OF_STOCK"
                           ? "bg-[#ffe8eb] text-[#d52d45]"
@@ -2867,19 +2866,19 @@ const brandOptions = useMemo(() => {
 
               <div className="rounded-[15px] border border-[#dce5ed] bg-white">
 
-                <div className="flex items-center gap-4 border-b border-[#e7edf3] px-7 py-6">
+                <div className="flex items-center gap-3 border-b border-[#e7edf3] px-4 py-4 sm:gap-4 sm:px-7 sm:py-6">
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f0eaff] text-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f0eaff] text-lg sm:h-11 sm:w-11 sm:text-xl">
                     📅
                   </div>
 
                   <div>
 
-                    <h3 className="text-[17px] font-semibold text-[#17385c]">
+                    <h3 className="text-[15px] font-semibold text-[#17385c] sm:text-[17px]">
                       RECORD INFORMATION
                     </h3>
 
-                    <p className="mt-1 text-sm text-[#8295aa]">
+                    <p className="mt-0.5 text-xs text-[#8295aa] sm:mt-1 sm:text-sm">
                       Inventory record information.
                     </p>
 
@@ -2887,58 +2886,32 @@ const brandOptions = useMemo(() => {
 
                 </div>
 
-                <div className="grid grid-cols-1 gap-x-12 gap-y-7 px-7 py-7 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-12 gap-y-5 px-4 py-5 sm:grid-cols-2 sm:gap-y-7 sm:px-7 sm:py-7">
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Created At
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
-
-                      {viewItem.createdAt
-                        ? new Date(
-                            viewItem.createdAt
-                          ).toLocaleString(
-                            "en-IN",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
-                        : "-"}
-
+                    <p className="text-[15px] font-medium text-[#183654] sm:text-[16px]">
+                      {formatDateTime(
+                        viewItem.createdAt
+                      )}
                     </p>
 
                   </div>
 
                   <div>
 
-                    <p className="mb-2 text-sm text-[#8a9db1]">
+                    <p className="mb-1 text-xs text-[#8a9db1] sm:mb-2 sm:text-sm">
                       Last Updated
                     </p>
 
-                    <p className="text-[16px] font-medium text-[#183654]">
-
-                      {viewItem.updatedAt
-                        ? new Date(
-                            viewItem.updatedAt
-                          ).toLocaleString(
-                            "en-IN",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
-                        : "-"}
-
+                    <p className="text-[15px] font-medium text-[#183654] sm:text-[16px]">
+                      {formatDateTime(
+                        viewItem.updatedAt
+                      )}
                     </p>
 
                   </div>
@@ -2961,21 +2934,21 @@ const brandOptions = useMemo(() => {
 
       {manageItem && (
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-6">
 
-          <div className="flex max-h-[94vh] w-full max-w-[860px] flex-col overflow-hidden rounded-[20px] bg-white shadow-2xl">
+          <div className="flex max-h-[94vh] w-full max-w-[860px] flex-col overflow-hidden rounded-t-[20px] bg-white shadow-2xl sm:rounded-[20px]">
 
             {/* HEADER */}
 
-            <div className="flex shrink-0 items-start justify-between border-b border-[#e4ebf2] bg-white px-7 py-6 sm:px-8">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[#e4ebf2] bg-white px-5 py-4 sm:px-8 sm:py-6">
 
               <div>
 
-                <h2 className="text-[24px] font-bold text-[#172b4d]">
+                <h2 className="text-xl font-bold text-[#172b4d] sm:text-[24px]">
                   Manage Inventory
                 </h2>
 
-                <p className="mt-1 text-[15px] text-[#7388a0]">
+                <p className="mt-1 text-sm text-[#7388a0] sm:text-[15px]">
                   Receive stock and update cost,
                   selling and stock-alert details.
                 </p>
@@ -2990,7 +2963,7 @@ const brandOptions = useMemo(() => {
                 disabled={
                   manageLoading
                 }
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f1f5f9] text-2xl leading-none text-[#6d8299] transition hover:bg-[#e7edf3] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f1f5f9] text-2xl leading-none text-[#6d8299] transition hover:bg-[#e7edf3] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 ×
               </button>
@@ -3003,46 +2976,46 @@ const brandOptions = useMemo(() => {
               onSubmit={
                 handleManageSubmit
               }
-              className="overflow-y-auto px-7 py-7 sm:px-8"
+              className="overflow-y-auto px-5 py-5 sm:px-8 sm:py-7"
             >
 
               {/* ITEM INFORMATION */}
 
-              <div className="mb-7 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="mb-5 grid grid-cols-1 gap-3 sm:mb-7 sm:gap-4 md:grid-cols-3">
 
-                <div className="rounded-[16px] bg-[#f7f9fc] px-6 py-5">
+                <div className="rounded-2xl bg-[#f7f9fc] px-5 py-3.5 sm:px-6 sm:py-5">
 
                   <p className="text-[13px] font-medium text-[#8295aa]">
                     Sport
                   </p>
 
-                  <p className="mt-3 text-[17px] font-semibold text-[#17385c]">
+                  <p className="mt-1 break-words text-[16px] font-semibold text-[#17385c] sm:mt-3 sm:text-[17px]">
                     {manageItem.sportName ||
                       "-"}
                   </p>
 
                 </div>
 
-                <div className="rounded-[16px] bg-[#f7f9fc] px-6 py-5">
+                <div className="rounded-2xl bg-[#f7f9fc] px-5 py-3.5 sm:px-6 sm:py-5">
 
                   <p className="text-[13px] font-medium text-[#8295aa]">
                     Sub Item
                   </p>
 
-                  <p className="mt-3 text-[17px] font-semibold text-[#17385c]">
+                  <p className="mt-1 break-words text-[16px] font-semibold text-[#17385c] sm:mt-3 sm:text-[17px]">
                     {manageItem.subItem ||
                       "-"}
                   </p>
 
                 </div>
 
-                <div className="rounded-[16px] bg-[#f7f9fc] px-6 py-5">
+                <div className="rounded-2xl bg-[#f7f9fc] px-5 py-3.5 sm:px-6 sm:py-5">
 
                   <p className="text-[13px] font-medium text-[#8295aa]">
                     Brand
                   </p>
 
-                  <p className="mt-3 text-[17px] font-semibold text-[#17385c]">
+                  <p className="mt-1 break-words text-[16px] font-semibold text-[#17385c] sm:mt-3 sm:text-[17px]">
                     {manageItem.brand ||
                       "-"}
                   </p>
@@ -3053,13 +3026,13 @@ const brandOptions = useMemo(() => {
 
               {/* CURRENT STOCK */}
 
-              <div className="mb-7">
+              <div className="mb-5 sm:mb-7">
 
                 <label className="mb-2 block text-[15px] font-semibold text-[#415d79]">
                   Current Stock
                 </label>
 
-                <div className="flex h-14 items-center rounded-[14px] border border-[#d5e0eb] bg-[#f5f7fa] px-5">
+                <div className="flex h-12 items-center rounded-[14px] border border-[#d5e0eb] bg-[#f5f7fa] px-4 sm:h-14 sm:px-5">
 
                   <span className="text-[17px] font-semibold text-[#536b86]">
                     {manageItem.currentStock ??
@@ -3076,7 +3049,7 @@ const brandOptions = useMemo(() => {
 
               {/* NEW STOCK */}
 
-              <div className="mb-7">
+              <div className="mb-5 sm:mb-7">
 
                 <label
                   htmlFor="manage-received-stock"
@@ -3119,7 +3092,7 @@ const brandOptions = useMemo(() => {
                   disabled={
                     manageLoading
                   }
-                  className={`h-14 w-full rounded-[14px] border bg-white px-5 text-[16px] text-[#263e5a] outline-none transition ${
+                  className={`h-12 w-full rounded-[14px] border bg-white px-4 text-[16px] text-[#263e5a] outline-none transition sm:h-14 sm:px-5 ${
                     manageErrors.receivedQuantity
                       ? "border-red-500 ring-1 ring-red-100"
                       : "border-[#d5e0eb]"
@@ -3140,7 +3113,7 @@ const brandOptions = useMemo(() => {
 
               {/* COST PRICE */}
 
-              <div className="mb-7">
+              <div className="mb-5 sm:mb-7">
 
                 <label
                   htmlFor="manage-cost-price"
@@ -3154,7 +3127,7 @@ const brandOptions = useMemo(() => {
 
                 <div className="relative">
 
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[16px] text-[#8ea2b7]">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[16px] text-[#8ea2b7] sm:left-5">
                     ₹
                   </span>
 
@@ -3190,7 +3163,7 @@ const brandOptions = useMemo(() => {
                     disabled={
                       manageLoading
                     }
-                    className={`h-14 w-full rounded-[14px] border bg-white pl-10 pr-5 text-[16px] text-[#263e5a] outline-none transition ${
+                    className={`h-12 w-full rounded-[14px] border bg-white pl-9 pr-4 text-[16px] text-[#263e5a] outline-none transition sm:h-14 sm:pl-10 sm:pr-5 ${
                       manageErrors.costPrice
                         ? "border-red-500 ring-1 ring-red-100"
                         : "border-[#d5e0eb]"
@@ -3213,7 +3186,7 @@ const brandOptions = useMemo(() => {
 
               {/* SELLING PRICE */}
 
-              <div className="mb-7">
+              <div className="mb-5 sm:mb-7">
 
                 <label
                   htmlFor="manage-selling-price"
@@ -3227,7 +3200,7 @@ const brandOptions = useMemo(() => {
 
                 <div className="relative">
 
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[16px] text-[#8ea2b7]">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[16px] text-[#8ea2b7] sm:left-5">
                     ₹
                   </span>
 
@@ -3263,7 +3236,7 @@ const brandOptions = useMemo(() => {
                     disabled={
                       manageLoading
                     }
-                    className={`h-14 w-full rounded-[14px] border bg-white pl-10 pr-5 text-[16px] text-[#263e5a] outline-none transition ${
+                    className={`h-12 w-full rounded-[14px] border bg-white pl-9 pr-4 text-[16px] text-[#263e5a] outline-none transition sm:h-14 sm:pl-10 sm:pr-5 ${
                       manageErrors.sellingPrice
                         ? "border-red-500 ring-1 ring-red-100"
                         : "border-[#d5e0eb]"
@@ -3282,7 +3255,7 @@ const brandOptions = useMemo(() => {
 
               {/* LOW STOCK */}
 
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
 
                 <label
                   htmlFor="manage-low-stock-alert"
@@ -3325,7 +3298,7 @@ const brandOptions = useMemo(() => {
                   disabled={
                     manageLoading
                   }
-                  className={`h-14 w-full rounded-[14px] border bg-white px-5 text-[16px] text-[#263e5a] outline-none transition ${
+                  className={`h-12 w-full rounded-[14px] border bg-white px-4 text-[16px] text-[#263e5a] outline-none transition sm:h-14 sm:px-5 ${
                     manageErrors.lowStockAlert
                       ? "border-red-500 ring-1 ring-red-100"
                       : "border-[#d5e0eb]"
@@ -3342,7 +3315,7 @@ const brandOptions = useMemo(() => {
 
               {/* BUTTONS */}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-[#e7edf3] pt-6 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-3 border-t border-[#e7edf3] pt-5 sm:flex-row sm:justify-end sm:pt-6">
 
                 <button
                   type="button"
@@ -3352,7 +3325,7 @@ const brandOptions = useMemo(() => {
                   disabled={
                     manageLoading
                   }
-                  className="h-12 rounded-[12px] border border-[#d4deea] bg-white px-7 text-[15px] font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-12 w-full rounded-[12px] border border-[#d4deea] bg-white px-7 text-[15px] font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -3362,7 +3335,7 @@ const brandOptions = useMemo(() => {
                   disabled={
                     manageLoading
                   }
-                  className="h-12 min-w-[190px] rounded-[12px] bg-[#0787c8] px-7 text-[15px] font-semibold text-white shadow-md transition hover:bg-[#0678b3] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-12 w-full rounded-[12px] bg-[#0787c8] px-7 text-[15px] font-semibold text-white shadow-md transition hover:bg-[#0678b3] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[190px]"
                 >
 
                   {manageLoading
@@ -3387,16 +3360,16 @@ const brandOptions = useMemo(() => {
 
       {statusConfirmItem && (
 
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 p-5">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-5">
 
-          <div className="w-full max-w-[470px] rounded-[18px] bg-white p-7 shadow-2xl">
+          <div className="w-full max-w-[470px] rounded-t-[20px] bg-white p-5 shadow-2xl sm:rounded-[18px] sm:p-7">
 
             {statusConfirmAction ===
             "BLOCKED" ? (
 
               <>
 
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-2xl text-red-600">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-2xl text-red-600 sm:mb-5">
                   !
                 </div>
 
@@ -3427,14 +3400,14 @@ const brandOptions = useMemo(() => {
                   then try again.
                 </p>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex sm:justify-end">
 
                   <button
                     type="button"
                     onClick={
                       closeStatusModal
                     }
-                    className="h-11 rounded-xl bg-[#0787c8] px-7 font-semibold text-white transition hover:bg-[#0678b3]"
+                    className="h-11 w-full rounded-xl bg-[#0787c8] px-7 font-semibold text-white transition hover:bg-[#0678b3] sm:w-auto"
                   >
                     Okay
                   </button>
@@ -3448,7 +3421,7 @@ const brandOptions = useMemo(() => {
               <>
 
                 <div
-                  className={`mb-5 flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                  className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl sm:mb-5 ${
                     statusConfirmAction ===
                     "ACTIVE"
                       ? "bg-green-100 text-green-600"
@@ -3491,7 +3464,7 @@ const brandOptions = useMemo(() => {
 
                 </p>
 
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                   <button
                     type="button"
@@ -3501,7 +3474,7 @@ const brandOptions = useMemo(() => {
                     onClick={
                       closeStatusModal
                     }
-                    className="h-11 rounded-xl border border-[#d4deea] bg-white px-6 font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:opacity-60"
+                    className="h-11 w-full rounded-xl border border-[#d4deea] bg-white px-6 font-semibold text-[#536b86] transition hover:bg-[#f7fafc] disabled:opacity-60 sm:w-auto"
                   >
                     Cancel
                   </button>
@@ -3514,7 +3487,7 @@ const brandOptions = useMemo(() => {
                     onClick={
                       confirmStatusChange
                     }
-                    className={`h-11 rounded-xl px-6 font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    className={`h-11 w-full rounded-xl px-6 font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto ${
                       statusConfirmAction ===
                       "ACTIVE"
                         ? "bg-[#0787c8] hover:bg-[#0678b3]"

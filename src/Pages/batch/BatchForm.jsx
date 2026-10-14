@@ -2022,36 +2022,41 @@ export default function BatchForm() {
                   </span>
                 </label>
 
-                <div className="flex gap-2">
 
-                  <input
-                    type="text"
-                    name="courseDuration"
-                    value={
-                      formData.courseDuration
-                        ? `${formData.courseDuration} ${
-                            formData.courseDurationUnit === "MONTHS"
-                              ? Number(formData.courseDuration) === 1
-                                ? "Month"
-                                : "Months"
-                              : formData.courseDurationUnit
-                        }`
-                        : ""
-                    }
-                    readOnly
-                    placeholder="Select start and end dates"
-                    className={`flex-1 h-11 px-4 border rounded-xl text-sm bg-slate-50 text-slate-700 cursor-not-allowed ${
-                      errors.courseDuration
-                        ? "border-red-500"
-                        : "border-slate-200"
-                    }`}
-                  />
+<div className="flex flex-col sm:flex-row gap-2">
 
-                  <div className="w-36 h-11 px-3 border border-slate-200 rounded-xl text-sm bg-slate-50 flex items-center justify-center text-slate-600">
-                    Automatically
-                  </div>
+  <input
+    type="text"
+    name="courseDuration"
+    value={
+      formData.courseDuration
+        ? `${formData.courseDuration} ${
+            formData.courseDurationUnit === "MONTHS"
+              ? Number(formData.courseDuration) === 1
+                ? "Month"
+                : "Months"
+              : formData.courseDurationUnit
+          }`
+        : ""
+    }
+    readOnly
+    placeholder="Select start and end dates"
+    className={`w-full sm:flex-1 min-w-0 h-11 px-4 border rounded-xl text-sm bg-slate-50 text-slate-700 cursor-not-allowed ${
+      errors.courseDuration
+        ? "border-red-500"
+        : "border-slate-200"
+    }`}
+  />
 
-                </div>
+  <div className="w-full sm:w-36 shrink-0 h-11 px-3 border border-slate-200 rounded-xl text-sm bg-slate-50 flex items-center justify-center text-slate-600 whitespace-nowrap">
+    Automatically
+  </div>
+
+</div>
+
+
+
+
 
                 <p className="mt-1.5 text-xs text-slate-400">
                   Automatically calculated from the selected start date and end date.
